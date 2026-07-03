@@ -1,0 +1,45 @@
+#!/bin/zsh
+set -euo pipefail
+
+ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+PLIST_DIR="$HOME/Library/LaunchAgents"
+PLIST_PATH="$PLIST_DIR/com.luqiling.gzl.github-auto-sync.plist"
+LABEL="com.luqiling.gzl.github-auto-sync"
+LOG_DIR="$HOME/Library/Logs/gzl-github-sync"
+OUT_LOG="$LOG_DIR/stdout.log"
+ERR_LOG="$LOG_DIR/stderr.log"
+
+mkdir -p "$PLIST_DIR" "$LOG_DIR"
+
+cat > "$PLIST_PATH" <<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    <key>Label</key>
+    <string>$LABEL</string>
+    <key>ProgramArguments</key>
+    <array>
+      <string>$ROOT_DIR/scripts/github-auto-sync.sh</string>
+    </array>
+    <key>WorkingDirectory</key>
+    <string>$ROOT_DIR</string>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>StartInterval</key>
+    <integer>30</integer>
+    <key>StandardOutPath</key>
+    <string>$OUT_LOG</string>
+    <key>StandardErrorPath</key>
+    <string>$ERR_LOG</string>
+  </dict>
+</plist>
+EOF
+
+launchctl bootout "gui/$(id -u)" "$PLIST_PATH" >/dev/null 2>&1 || true
+launchctl bootstrap "gui/$(id -u)" "$PLIST_PATH"
+launchctl kickstart -k "gui/$(id -u)/$LABEL"
+
+echo "Installed auto sync agent: $LABEL"
+echo "LaunchAgent: $PLIST_PATH"
+echo "Logs: $LOG_DIR"

@@ -1,165 +1,288 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Canva PPT 工作流操作台</title>
-    <link rel="stylesheet" href="./styles.css" />
+    <meta
+      name="description"
+      content="按步骤填写信息、选择风格选项，并生成 PPT 执行输出内容。"
+    />
+    <title>PPT Brief Builder</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%2318312c'/%3E%3Cpath d='M18 22h28v6H18zm0 14h18v6H18z' fill='%23f8efe3'/%3E%3C/svg%3E"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/style.css" />
   </head>
   <body>
-    <main class="app-shell">
-      <aside class="sidebar">
-        <div class="brand">
-          <div class="brand-mark">GZL</div>
-          <div>
-            <h1>Canva PPT 操作台</h1>
-            <p>从资料确认到 PPT/PDF 交付。</p>
+    <div class="site-shell">
+      <header class="site-header">
+        <div class="container header-row">
+          <a class="brand" href="#top">
+            <span class="brand-mark">CB</span>
+            <span class="brand-text">PPT Brief Builder</span>
+          </a>
+
+          <div class="header-actions">
+            <button class="button button-secondary button-compact" type="button" id="fill-example">
+              示例
+            </button>
+            <button class="button button-ghost button-compact" type="button" id="reset-form">
+              清空
+            </button>
           </div>
         </div>
+      </header>
 
-        <section class="panel">
-          <div class="panel-title">
-            <span>任务信息</span>
-            <button id="loadDemo" class="ghost-button" type="button">示例</button>
+      <main class="wizard-main" id="top">
+        <section class="wizard-shell container">
+          <div class="wizard-intro">
+            <p class="eyebrow">PPT Brief Builder</p>
+            <h1>按步骤填写信息</h1>
           </div>
-          <label>
-            项目名称
-            <input id="projectName" type="text" placeholder="例如：客户资料整理" />
-          </label>
-          <label>
-            操作者
-            <input id="operatorName" type="text" placeholder="请输入姓名" />
-          </label>
-          <label>
-            输入来源
-            <textarea id="inputSource" rows="4" placeholder="粘贴链接、文件名、需求说明或原始数据位置"></textarea>
-          </label>
+
+          <div class="progress-row" id="progress-row" aria-label="步骤进度"></div>
+
+          <form class="wizard-form" id="brief-form" novalidate>
+            <section class="wizard-step" data-step="0">
+              <div class="step-head">
+                <span class="step-kicker">步骤 1</span>
+                <h2>基础信息</h2>
+              </div>
+
+              <div class="field-grid">
+                <label class="field">
+                  <span>项目名称</span>
+                  <input
+                    type="text"
+                    name="projectName"
+                    placeholder="例如：某公司 CEO 单页介绍"
+                  />
+                </label>
+
+                <label class="field">
+                  <span>使用场景</span>
+                  <select name="useCase" required>
+                    <option value="">请选择</option>
+                    <option value="CEO介绍">CEO 介绍</option>
+                    <option value="品牌客户提案">品牌客户提案</option>
+                    <option value="产品介绍">产品介绍</option>
+                    <option value="融资路演">融资路演</option>
+                    <option value="项目汇报">项目汇报</option>
+                    <option value="培训课件">培训课件</option>
+                  </select>
+                </label>
+
+                <fieldset class="field fieldset field-span-2">
+                  <legend>目标观众</legend>
+                  <div class="radio-group" id="audience-options">
+                    <label><input type="radio" name="audienceOption" value="品牌客户" checked />品牌客户</label>
+                    <label><input type="radio" name="audienceOption" value="投资人" />投资人</label>
+                    <label><input type="radio" name="audienceOption" value="内部管理层" />内部管理层</label>
+                    <label><input type="radio" name="audienceOption" value="合作伙伴" />合作伙伴</label>
+                    <label><input type="radio" name="audienceOption" value="培训学员" />培训学员</label>
+                    <label><input type="radio" name="audienceOption" value="其他" />其他</label>
+                  </div>
+                  <input
+                    type="text"
+                    name="audienceCustom"
+                    id="audience-custom"
+                    placeholder="输入其他目标观众"
+                    hidden
+                  />
+                </fieldset>
+
+                <label class="field">
+                  <span>页数预期</span>
+                  <select name="pageCount" required>
+                    <option value="1页">1 页单页</option>
+                    <option value="5页">5 页以内</option>
+                    <option value="10页">10 页左右</option>
+                    <option value="自动判断">自动判断</option>
+                  </select>
+                </label>
+
+                <label class="field">
+                  <span>语言</span>
+                  <select name="language" required>
+                    <option value="中文">中文</option>
+                    <option value="英文">英文</option>
+                    <option value="中英双语">中英双语</option>
+                  </select>
+                </label>
+              </div>
+            </section>
+
+            <section class="wizard-step" data-step="1" hidden>
+              <div class="step-head">
+                <span class="step-kicker">步骤 2</span>
+                <h2>素材与限制</h2>
+              </div>
+
+              <label class="field">
+                <span>文字素材</span>
+                <textarea
+                  name="materialsText"
+                  rows="7"
+                  placeholder="例如：人物截图、公司简介、3 条代表成绩、产品图、季度数据"
+                ></textarea>
+              </label>
+
+              <div class="field-grid">
+                <label class="field">
+                  <span>链接</span>
+                  <textarea
+                    name="referenceLinks"
+                    rows="5"
+                    placeholder="每行一个链接，例如官网、文档、网盘、视频地址"
+                  ></textarea>
+                </label>
+
+                <div class="upload-stack">
+                  <label class="field upload-field">
+                    <span>图片 / 截图</span>
+                    <input type="file" name="imageFiles" id="image-files" accept="image/*" multiple />
+                    <small class="file-summary" id="image-files-summary">未选择文件</small>
+                  </label>
+
+                  <label class="field upload-field">
+                    <span>视频 / 录屏</span>
+                    <input type="file" name="videoFiles" id="video-files" accept="video/*" multiple />
+                    <small class="file-summary" id="video-files-summary">未选择文件</small>
+                  </label>
+
+                  <label class="field upload-field">
+                    <span>文档 / PPT</span>
+                    <input
+                      type="file"
+                      name="docFiles"
+                      id="doc-files"
+                      accept=".pdf,.ppt,.pptx,.doc,.docx,.xls,.xlsx,.txt,.md"
+                      multiple
+                    />
+                    <small class="file-summary" id="doc-files-summary">未选择文件</small>
+                  </label>
+                </div>
+              </div>
+
+              <label class="field">
+                <span>限制条件</span>
+                <textarea
+                  name="restrictions"
+                  rows="5"
+                  placeholder="例如：只读取文字和图片，不参考原截图版式、Logo 和旧 PPT 设计"
+                ></textarea>
+              </label>
+            </section>
+
+            <section class="wizard-step" data-step="2" hidden>
+              <div class="step-head">
+                <span class="step-kicker">步骤 3</span>
+                <h2>选择调性与风格</h2>
+              </div>
+
+              <fieldset class="field fieldset choice-fieldset">
+                <legend>表达调性</legend>
+                <div class="choice-grid" id="tone-options"></div>
+                <div class="custom-entry" id="tone-custom-wrap" hidden>
+                  <input
+                    type="text"
+                    name="toneCustom"
+                    id="tone-custom"
+                    placeholder="输入自定义调性"
+                  />
+                </div>
+              </fieldset>
+
+              <div class="picker-head">
+                <h3>可选风格</h3>
+              </div>
+
+              <div class="choice-grid style-grid" id="style-options"></div>
+              <div class="custom-entry" id="style-custom-wrap" hidden>
+                <input
+                  type="text"
+                  name="styleCustom"
+                  id="style-custom"
+                  placeholder="输入自定义风格"
+                />
+              </div>
+            </section>
+
+            <section class="wizard-step" data-step="3" hidden>
+              <div class="step-head">
+                <span class="step-kicker">步骤 4</span>
+                <h2>输出设置</h2>
+              </div>
+
+              <fieldset class="field fieldset">
+                <legend>输出格式</legend>
+                <div class="checkbox-group">
+                  <label><input type="checkbox" name="output" value="PPTX" checked />PPTX</label>
+                  <label><input type="checkbox" name="output" value="PDF" />PDF</label>
+                  <label><input type="checkbox" name="output" value="讲稿" />讲稿</label>
+                </div>
+              </fieldset>
+
+              <div class="confirm-card">
+                <h3>确认信息</h3>
+                <dl class="confirm-list" id="confirm-list"></dl>
+              </div>
+            </section>
+
+            <div class="wizard-actions">
+              <button class="button button-secondary" type="button" id="prev-step">
+                上一步
+              </button>
+              <button class="button button-primary" type="button" id="next-step">
+                下一步
+              </button>
+              <button
+                class="button button-primary"
+                type="submit"
+                id="generate-result"
+                hidden
+              >
+                生成输出
+              </button>
+            </div>
+          </form>
         </section>
 
-        <section class="panel">
-          <div class="panel-title">
-            <span>流程模板</span>
-            <button id="addStep" class="ghost-button" type="button">新增</button>
+        <section class="result-shell container" id="result-shell" hidden>
+          <div class="result-head">
+            <div>
+              <p class="eyebrow">Output</p>
+              <h2>输出内容</h2>
+            </div>
+
+            <div class="result-actions">
+              <button class="button button-secondary" type="button" id="copy-output">
+                复制内容
+              </button>
+              <button class="button button-ghost" type="button" id="edit-output">
+                返回修改
+              </button>
+            </div>
           </div>
-          <div id="stepEditor" class="step-editor"></div>
+
+          <div class="result-summary" id="result-summary"></div>
+
+          <article class="result-card">
+            <pre id="result-text"></pre>
+          </article>
         </section>
+      </main>
+    </div>
 
-        <section class="panel">
-          <div class="panel-title">
-            <span>飞书通知</span>
-          </div>
-          <label>
-            通知模式
-            <select id="feishuMode">
-              <option value="webhook">Webhook 快速模式</option>
-              <option value="app">应用机器人模式</option>
-            </select>
-          </label>
-          <label data-feishu-mode="app">
-            接收类型
-            <select id="feishuReceiveType">
-              <option value="chat_id">群聊 chat_id</option>
-              <option value="open_id">用户 open_id</option>
-              <option value="user_id">用户 user_id</option>
-              <option value="email">用户邮箱</option>
-            </select>
-          </label>
-          <label data-feishu-mode="app">
-            接收 ID
-            <input id="feishuReceiveId" type="text" placeholder="留空则使用后端默认配置" />
-          </label>
-          <label data-feishu-mode="webhook">
-            Webhook 地址
-            <input id="feishuWebhookUrl" type="password" placeholder="留空则使用 .env 默认配置" />
-          </label>
-          <label data-feishu-mode="webhook">
-            签名密钥
-            <input id="feishuWebhookSecret" type="password" placeholder="可选：开启签名校验时填写" />
-          </label>
-          <label class="check-row">
-            <input id="feishuAutoNotify" type="checkbox" />
-            <span>完成步骤时自动通知飞书</span>
-          </label>
-          <button id="checkFeishuConfig" type="button">检测飞书配置</button>
-          <button id="sendFeishuUpdate" type="button">发送当前进度</button>
-        </section>
-      </aside>
+    <div class="sr-only" aria-live="polite" id="live-region"></div>
 
-      <section class="workspace">
-        <header class="topbar">
-          <div>
-            <p class="eyebrow">Visual Workflow</p>
-            <h2 id="workflowTitle">Canva PPT 工作流</h2>
-          </div>
-          <div class="actions">
-            <button id="saveConfig" type="button">保存配置</button>
-            <button id="exportReport" type="button">导出报告</button>
-            <button id="runWorkflow" class="primary-button" type="button">开始运行</button>
-          </div>
-        </header>
-
-        <section class="status-strip">
-          <div>
-            <span id="totalSteps">0</span>
-            <small>步骤</small>
-          </div>
-          <div>
-            <span id="doneSteps">0</span>
-            <small>完成</small>
-          </div>
-          <div>
-            <span id="currentStatus">未开始</span>
-            <small>状态</small>
-          </div>
-          <div>
-            <span id="runtime">00:00</span>
-            <small>耗时</small>
-          </div>
-        </section>
-
-        <section class="flow-board" id="flowBoard" aria-label="工作流步骤"></section>
-      </section>
-
-      <aside class="activity">
-        <section class="panel activity-panel">
-          <div class="panel-title">
-            <span>运行日志</span>
-            <button id="clearLog" class="ghost-button" type="button">清空</button>
-          </div>
-          <div id="logList" class="log-list"></div>
-        </section>
-
-        <section class="panel">
-          <div class="panel-title">
-            <span>交付物</span>
-          </div>
-          <div class="deliverables">
-            <button id="copySummary" type="button">复制摘要</button>
-            <button id="downloadConfig" type="button">下载配置</button>
-            <label class="file-button">
-              导入配置
-              <input id="importConfig" type="file" accept="application/json" />
-            </label>
-          </div>
-        </section>
-      </aside>
-    </main>
-
-    <template id="stepCardTemplate">
-      <article class="step-card">
-        <div class="step-card-head">
-          <span class="step-index"></span>
-          <span class="step-state"></span>
-        </div>
-        <h3></h3>
-        <p></p>
-        <div class="step-tools">
-          <button class="mark-done" type="button">完成</button>
-          <button class="mark-reset" type="button">重置</button>
-        </div>
-      </article>
-    </template>
-
-    <script src="./app.js"></script>
+    <script src="js/main.js"></script>
   </body>
 </html>
