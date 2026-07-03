@@ -20,7 +20,7 @@ python3 -m http.server 4173
 
 ## GitHub 自动同步
 
-运行下面的安装脚本后，macOS 会通过 `launchd` 每 30 秒检查一次当前仓库。
+运行下面的启动脚本后，会在当前用户会话里常驻一个后台同步进程，每 30 秒检查一次当前仓库。
 
 ```bash
 ./scripts/install-github-auto-sync.sh

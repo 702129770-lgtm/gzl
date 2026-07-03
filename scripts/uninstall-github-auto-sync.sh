@@ -1,12 +1,21 @@
 #!/bin/zsh
 set -euo pipefail
 
+PID_FILE="$HOME/Library/Application Support/gzl-github-sync/auto-sync.pid"
 PLIST_PATH="$HOME/Library/LaunchAgents/com.luqiling.gzl.github-auto-sync.plist"
-LABEL="com.luqiling.gzl.github-auto-sync"
 
 if [ -f "$PLIST_PATH" ]; then
   launchctl bootout "gui/$(id -u)" "$PLIST_PATH" >/dev/null 2>&1 || true
   rm -f "$PLIST_PATH"
 fi
 
-echo "Removed auto sync agent: $LABEL"
+if [ -f "$PID_FILE" ]; then
+  PID_VALUE="$(cat "$PID_FILE")"
+  if kill -0 "$PID_VALUE" >/dev/null 2>&1; then
+    kill "$PID_VALUE"
+  fi
+
+  rm -f "$PID_FILE"
+fi
+
+echo "Stopped GitHub auto sync."
