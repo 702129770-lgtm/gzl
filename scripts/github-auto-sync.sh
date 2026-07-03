@@ -4,7 +4,7 @@ set -euo pipefail
 export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 export GIT_TERMINAL_PROMPT=0
 
-ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd -P)"
 LOCK_DIR="${TMPDIR:-/tmp}/gzl-github-auto-sync.lock"
 
 cleanup() {
