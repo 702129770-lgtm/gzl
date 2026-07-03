@@ -551,19 +551,17 @@ function renderToneOptions() {
       const isSelected = selectedToneOption === tone.id;
 
       return `
-        <label class="choice-card ${isSelected ? "is-selected" : ""}">
-          <input type="radio" name="toneOption" value="${tone.id}" ${isSelected ? "checked" : ""} />
+        <button class="choice-card ${isSelected ? "is-selected" : ""}" type="button" data-tone-option="${tone.id}">
           <h4>${tone.title}</h4>
           <p>${tone.description}</p>
-        </label>
+        </button>
       `;
     }),
     `
-      <label class="choice-card ${selectedToneOption === "custom" ? "is-selected" : ""}">
-        <input type="radio" name="toneOption" value="custom" ${selectedToneOption === "custom" ? "checked" : ""} />
+      <button class="choice-card ${selectedToneOption === "custom" ? "is-selected" : ""}" type="button" data-tone-option="custom">
         <h4>自定义输入</h4>
         <p>自己填写你想要的表达调性。</p>
-      </label>
+      </button>
     `,
   ].join("");
 
@@ -584,8 +582,7 @@ function renderStyleOptions() {
       const isSelected = selectedStyleOption === style.id;
 
       return `
-        <label class="style-card ${isSelected ? "is-selected" : ""}">
-          <input type="radio" name="styleOption" value="${style.id}" ${isSelected ? "checked" : ""} />
+        <button class="style-card ${isSelected ? "is-selected" : ""}" type="button" data-style-option="${style.id}">
           <div class="style-card-head">
             <h4>${style.title}</h4>
           </div>
@@ -594,19 +591,18 @@ function renderStyleOptions() {
             <p><strong>色彩：</strong>${style.colors}</p>
             <p><strong>版式：</strong>${style.layout}</p>
           </div>
-        </label>
+        </button>
       `;
     }),
     `
-      <label class="style-card ${selectedStyleOption === "custom" ? "is-selected" : ""}">
-        <input type="radio" name="styleOption" value="custom" ${selectedStyleOption === "custom" ? "checked" : ""} />
+      <button class="style-card ${selectedStyleOption === "custom" ? "is-selected" : ""}" type="button" data-style-option="custom">
         <div class="style-card-head">
           <h4>自定义输入</h4>
         </div>
         <div class="style-facts">
           <p><strong>说明：</strong>自己填写希望呈现的风格方向。</p>
         </div>
-      </label>
+      </button>
     `,
   ].join("");
 
@@ -912,17 +908,6 @@ function initializeEvents() {
       updateAudienceCustomVisibility();
     }
 
-    if (target.name === "toneOption") {
-      selectedToneOption = target.value;
-      renderToneOptions();
-      renderStyleOptions();
-    }
-
-    if (target.name === "styleOption") {
-      selectedStyleOption = target.value;
-      renderStyleOptions();
-    }
-
     resetResult();
 
     if (currentStep >= 2) {
@@ -934,6 +919,39 @@ function initializeEvents() {
       renderConfirmList();
     }
 
+    saveDraft();
+  });
+
+  toneOptionsContainer.addEventListener("click", (event) => {
+    const trigger = event.target.closest("[data-tone-option]");
+
+    if (!trigger) {
+      return;
+    }
+
+    selectedToneOption = trigger.dataset.toneOption;
+    renderToneOptions();
+    renderStyleOptions();
+    if (currentStep === 3) {
+      renderConfirmList();
+    }
+    resetResult();
+    saveDraft();
+  });
+
+  styleOptionsContainer.addEventListener("click", (event) => {
+    const trigger = event.target.closest("[data-style-option]");
+
+    if (!trigger) {
+      return;
+    }
+
+    selectedStyleOption = trigger.dataset.styleOption;
+    renderStyleOptions();
+    if (currentStep === 3) {
+      renderConfirmList();
+    }
+    resetResult();
     saveDraft();
   });
 
