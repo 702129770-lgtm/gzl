@@ -6,14 +6,30 @@ export GIT_TERMINAL_PROMPT=0
 
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd -P)"
 LOCK_DIR="${TMPDIR:-/tmp}/gzl-github-auto-sync.lock"
+LOCK_PID_FILE="$LOCK_DIR/pid"
 
 cleanup() {
+  rm -f "$LOCK_PID_FILE" >/dev/null 2>&1 || true
   rmdir "$LOCK_DIR" >/dev/null 2>&1 || true
 }
 
 if ! mkdir "$LOCK_DIR" 2>/dev/null; then
-  exit 0
+  if [ -f "$LOCK_PID_FILE" ]; then
+    LOCK_PID="$(cat "$LOCK_PID_FILE" 2>/dev/null || true)"
+    if [ -n "$LOCK_PID" ] && ! kill -0 "$LOCK_PID" >/dev/null 2>&1; then
+      rm -f "$LOCK_PID_FILE" >/dev/null 2>&1 || true
+      rmdir "$LOCK_DIR" >/dev/null 2>&1 || true
+      mkdir "$LOCK_DIR" 2>/dev/null || exit 0
+    else
+      exit 0
+    fi
+  else
+    rmdir "$LOCK_DIR" >/dev/null 2>&1 || exit 0
+    mkdir "$LOCK_DIR" 2>/dev/null || exit 0
+  fi
 fi
+
+echo "$$" > "$LOCK_PID_FILE"
 
 trap cleanup EXIT
 

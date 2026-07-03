@@ -9,6 +9,7 @@ LOG_DIR="$HOME/Library/Logs/gzl-github-sync"
 OUT_LOG="$LOG_DIR/stdout.log"
 ERR_LOG="$LOG_DIR/stderr.log"
 PID_FILE="$HOME/Library/Application Support/gzl-github-sync/auto-sync.pid"
+LOCK_DIR="${TMPDIR:-/tmp}/gzl-github-auto-sync.lock"
 
 mkdir -p "$PLIST_DIR" "$LOG_DIR"
 
@@ -20,6 +21,9 @@ if [ -f "$PID_FILE" ]; then
 
   rm -f "$PID_FILE"
 fi
+
+rm -f "$LOCK_DIR/pid" >/dev/null 2>&1 || true
+rmdir "$LOCK_DIR" >/dev/null 2>&1 || true
 
 cat > "$PLIST_PATH" <<EOF
 <?xml version="1.0" encoding="UTF-8"?>

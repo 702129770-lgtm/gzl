@@ -3,6 +3,7 @@ set -euo pipefail
 
 PID_FILE="$HOME/Library/Application Support/gzl-github-sync/auto-sync.pid"
 PLIST_PATH="$HOME/Library/LaunchAgents/com.luqiling.gzl.github-auto-sync.plist"
+LOCK_DIR="${TMPDIR:-/tmp}/gzl-github-auto-sync.lock"
 
 if [ -f "$PLIST_PATH" ]; then
   launchctl bootout "gui/$(id -u)" "$PLIST_PATH" >/dev/null 2>&1 || true
@@ -17,5 +18,8 @@ if [ -f "$PID_FILE" ]; then
 
   rm -f "$PID_FILE"
 fi
+
+rm -f "$LOCK_DIR/pid" >/dev/null 2>&1 || true
+rmdir "$LOCK_DIR" >/dev/null 2>&1 || true
 
 echo "Stopped GitHub auto sync."
