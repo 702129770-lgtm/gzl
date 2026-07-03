@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Canva PPT 工作流操作台</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="brand-mark">GZL</div>
+          <div>
+            <h1>Canva PPT 操作台</h1>
+            <p>从资料确认到 PPT/PDF 交付。</p>
+          </div>
+        </div>
+
+        <section class="panel">
+          <div class="panel-title">
+            <span>任务信息</span>
+            <button id="loadDemo" class="ghost-button" type="button">示例</button>
+          </div>
+          <label>
+            项目名称
+            <input id="projectName" type="text" placeholder="例如：客户资料整理" />
+          </label>
+          <label>
+            操作者
+            <input id="operatorName" type="text" placeholder="请输入姓名" />
+          </label>
+          <label>
+            输入来源
+            <textarea id="inputSource" rows="4" placeholder="粘贴链接、文件名、需求说明或原始数据位置"></textarea>
+          </label>
+        </section>
+
+        <section class="panel">
+          <div class="panel-title">
+            <span>流程模板</span>
+            <button id="addStep" class="ghost-button" type="button">新增</button>
+          </div>
+          <div id="stepEditor" class="step-editor"></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-title">
+            <span>飞书通知</span>
+          </div>
+          <label>
+            通知模式
+            <select id="feishuMode">
+              <option value="webhook">Webhook 快速模式</option>
+              <option value="app">应用机器人模式</option>
+            </select>
+          </label>
+          <label data-feishu-mode="app">
+            接收类型
+            <select id="feishuReceiveType">
+              <option value="chat_id">群聊 chat_id</option>
+              <option value="open_id">用户 open_id</option>
+              <option value="user_id">用户 user_id</option>
+              <option value="email">用户邮箱</option>
+            </select>
+          </label>
+          <label data-feishu-mode="app">
+            接收 ID
+            <input id="feishuReceiveId" type="text" placeholder="留空则使用后端默认配置" />
+          </label>
+          <label data-feishu-mode="webhook">
+            Webhook 地址
+            <input id="feishuWebhookUrl" type="password" placeholder="留空则使用 .env 默认配置" />
+          </label>
+          <label data-feishu-mode="webhook">
+            签名密钥
+            <input id="feishuWebhookSecret" type="password" placeholder="可选：开启签名校验时填写" />
+          </label>
+          <label class="check-row">
+            <input id="feishuAutoNotify" type="checkbox" />
+            <span>完成步骤时自动通知飞书</span>
+          </label>
+          <button id="checkFeishuConfig" type="button">检测飞书配置</button>
+          <button id="sendFeishuUpdate" type="button">发送当前进度</button>
+        </section>
+      </aside>
+
+      <section class="workspace">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Visual Workflow</p>
+            <h2 id="workflowTitle">Canva PPT 工作流</h2>
+          </div>
+          <div class="actions">
+            <button id="saveConfig" type="button">保存配置</button>
+            <button id="exportReport" type="button">导出报告</button>
+            <button id="runWorkflow" class="primary-button" type="button">开始运行</button>
+          </div>
+        </header>
+
+        <section class="status-strip">
+          <div>
+            <span id="totalSteps">0</span>
+            <small>步骤</small>
+          </div>
+          <div>
+            <span id="doneSteps">0</span>
+            <small>完成</small>
+          </div>
+          <div>
+            <span id="currentStatus">未开始</span>
+            <small>状态</small>
+          </div>
+          <div>
+            <span id="runtime">00:00</span>
+            <small>耗时</small>
+          </div>
+        </section>
+
+        <section class="flow-board" id="flowBoard" aria-label="工作流步骤"></section>
+      </section>
+
+      <aside class="activity">
+        <section class="panel activity-panel">
+          <div class="panel-title">
+            <span>运行日志</span>
+            <button id="clearLog" class="ghost-button" type="button">清空</button>
+          </div>
+          <div id="logList" class="log-list"></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-title">
+            <span>交付物</span>
+          </div>
+          <div class="deliverables">
+            <button id="copySummary" type="button">复制摘要</button>
+            <button id="downloadConfig" type="button">下载配置</button>
+            <label class="file-button">
+              导入配置
+              <input id="importConfig" type="file" accept="application/json" />
+            </label>
+          </div>
+        </section>
+      </aside>
+    </main>
+
+    <template id="stepCardTemplate">
+      <article class="step-card">
+        <div class="step-card-head">
+          <span class="step-index"></span>
+          <span class="step-state"></span>
+        </div>
+        <h3></h3>
+        <p></p>
+        <div class="step-tools">
+          <button class="mark-done" type="button">完成</button>
+          <button class="mark-reset" type="button">重置</button>
+        </div>
+      </article>
+    </template>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
