@@ -20,6 +20,7 @@ cat > "$PLIST_PATH" <<EOF
     <string>$LABEL</string>
     <key>ProgramArguments</key>
     <array>
+      <string>/bin/zsh</string>
       <string>$ROOT_DIR/scripts/github-auto-sync.sh</string>
     </array>
     <key>WorkingDirectory</key>
