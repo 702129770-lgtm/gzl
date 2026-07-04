@@ -1,350 +1,150 @@
-const STORAGE_KEY = "ppt-brief-builder";
-
-const STEP_CONFIG = [
+const screens = [
   {
-    title: "基础信息",
-    hint: "定义使用场景、受众和页数边界。",
+    id: "intro",
+    header: "服务介绍",
+    eyebrow: "PPT service",
+    title: "把资料交给我们，先看样稿，再确认全套 PPT。",
+    copy: "上传资料后，我们会根据内容匹配合适的视觉方向。你只需要确认风格、样稿和成稿，最后下载 PPTX 或 PDF。",
   },
   {
-    title: "素材与限制",
-    hint: "说明哪些素材必须使用，哪些内容不能参考。",
+    id: "upload",
+    header: "上传资料",
+    eyebrow: "Project brief",
+    title: "先补齐制作资料，我们会根据内容匹配合适的 PPT 风格。",
+    copy: "请填写项目场景、受众、页数和素材说明。预览版不会真正上传文件，只模拟用户流程。",
   },
   {
-    title: "调性与风格",
-    hint: "先锁定视觉方向，再进入样稿。",
+    id: "processing",
+    header: "处理中",
+    eyebrow: "Preparing",
+    title: "正在整理资料并匹配模板方向。",
+    copy: "这一步会自动完成，请稍等片刻。",
   },
   {
-    title: "输出设置",
-    hint: "确认交付格式，生成执行 brief。",
+    id: "style",
+    header: "选择风格",
+    eyebrow: "Style options",
+    title: "选择一个你希望样稿靠近的视觉方向。",
+    copy: "如果没有满意的方向，也可以选择自定义风格，我们会按描述生成样稿。",
+  },
+  {
+    id: "sample",
+    header: "确认样稿",
+    eyebrow: "Sample review",
+    title: "这是根据当前资料生成的样稿方向。",
+    copy: "你可以通过样稿、返回重选风格，或进入修改反馈。",
+  },
+  {
+    id: "revision",
+    header: "修改反馈",
+    eyebrow: "Revision",
+    title: "告诉我们需要调整哪里。",
+    copy: "可以描述整体修改，也可以选择具体区域和修改强度。",
+  },
+  {
+    id: "making",
+    header: "制作中",
+    eyebrow: "Creating deck",
+    title: "正在制作完整 PPT。",
+    copy: "样稿确认后，我们会扩展完整页面并生成预览文件。",
+  },
+  {
+    id: "final",
+    header: "成稿预览",
+    eyebrow: "Final preview",
+    title: "完整成稿已准备好，请确认是否需要修改。",
+    copy: "如果无需修改，可以进入导出下载；如果仍需调整，会回到同一个修改反馈页。",
+  },
+  {
+    id: "export",
+    header: "导出下载",
+    eyebrow: "Export",
+    title: "选择你需要的交付格式。",
+    copy: "预览版展示下载入口，正式版本会在这里生成真实文件。",
   },
 ];
 
-const STAGE_CONFIG = [
+const styles = [
   {
-    title: "定义项目",
-    note: "先确定这套 PPT 的用途、对象和页数边界。",
-  },
-  {
-    title: "整理素材",
-    note: "把文字、链接和文件来源说清楚，避免误用内容。",
-  },
-  {
-    title: "对齐风格",
-    note: "先收口调性和风格，再进入 1 页代表性样稿。",
-  },
-  {
-    title: "确认交付",
-    note: "锁定输出格式与大纲，生成一份可执行 brief。",
-  },
-];
-
-const DELIVERY_STAGES = [
-  {
-    label: "Brief 输入",
-    note: "确定用途、对象与页数范围。",
-  },
-  {
-    label: "素材归档",
-    note: "统一整理文字、链接和文件来源。",
-  },
-  {
-    label: "风格确认",
-    note: "对齐调性、版式和视觉节奏。",
-  },
-  {
-    label: "样稿准备",
-    note: "优先制作 1 页代表性页面。",
-  },
-  {
-    label: "最终交付",
-    note: "扩展全稿并导出最终文件。",
-  },
-];
-
-const USE_CASE_NOTES = {
-  CEO介绍: "适合用人物定位、履历与成绩建立可信度。",
-  品牌客户提案: "适合先讲客户问题，再讲策略与合作收益。",
-  产品介绍: "适合把定位、功能和价值拆成清晰模块。",
-  融资路演: "适合把机会点、增长证据和融资诉求放在前面。",
-  项目汇报: "适合围绕目标、进展、数据和下一步计划展开。",
-  培训课件: "适合以步骤、知识点和课后行动组织内容。",
-};
-
-const STYLE_THEMES = {
-  "trust-profile": {
-    bg: "linear-gradient(145deg, #173a35, #325d55 72%, #ded4c6 160%)",
-    text: "#f7f1e7",
-    muted: "rgba(247, 241, 231, 0.8)",
-    surface: "rgba(255, 255, 255, 0.12)",
-    accent: "#ffd8b0",
-  },
-  "clean-tech": {
-    bg: "linear-gradient(145deg, #121d27, #214155 68%, #d8dde2 150%)",
-    text: "#eef4f8",
-    muted: "rgba(238, 244, 248, 0.78)",
-    surface: "rgba(255, 255, 255, 0.1)",
-    accent: "#9fe6ff",
-  },
-  "editorial-story": {
-    bg: "linear-gradient(145deg, #3a2a24, #7f5c46 65%, #efe3d4 145%)",
-    text: "#fff5ea",
-    muted: "rgba(255, 245, 234, 0.8)",
-    surface: "rgba(255, 255, 255, 0.1)",
-    accent: "#ffd7b7",
-  },
-  "pitch-impact": {
-    bg: "linear-gradient(145deg, #14151c, #3f2754 52%, #0f5b5a 120%)",
-    text: "#f7f4ff",
-    muted: "rgba(247, 244, 255, 0.8)",
-    surface: "rgba(255, 255, 255, 0.11)",
-    accent: "#b9ffea",
-  },
-  "teaching-clear": {
-    bg: "linear-gradient(145deg, #20303a, #4d6d7f 62%, #edf1f4 146%)",
-    text: "#f7fbff",
-    muted: "rgba(247, 251, 255, 0.82)",
-    surface: "rgba(255, 255, 255, 0.12)",
-    accent: "#ffe4a8",
-  },
-};
-
-const TONE_LIBRARY = [
-  {
-    id: "trusted",
-    title: "稳重可信",
-    description: "适合人物介绍、品牌合作和正式汇报。",
-    useCases: ["CEO介绍", "品牌客户提案", "项目汇报"],
-    keywords: ["人物", "履历", "品牌", "合作", "公司", "介绍", "客户"],
-  },
-  {
-    id: "tech",
-    title: "科技简洁",
-    description: "适合产品逻辑、功能说明和结构化信息。",
-    useCases: ["产品介绍", "项目汇报", "融资路演"],
-    keywords: ["产品", "系统", "平台", "功能", "数据", "技术", "ai"],
-  },
-  {
-    id: "impact",
-    title: "高冲击路演",
-    description: "适合短时间突出机会点、增长和融资诉求。",
-    useCases: ["融资路演", "品牌客户提案"],
-    keywords: ["增长", "融资", "市场", "机会", "营收", "用户", "势能"],
-  },
-  {
-    id: "story",
-    title: "温和叙事",
-    description: "适合品牌故事、创始人形象和案例表达。",
-    useCases: ["品牌客户提案", "CEO介绍", "产品介绍"],
-    keywords: ["故事", "品牌", "文化", "案例", "形象", "愿景"],
-  },
-  {
-    id: "teaching",
-    title: "清晰教学",
-    description: "适合培训课件、步骤拆解和操作说明。",
-    useCases: ["培训课件", "项目汇报"],
-    keywords: ["培训", "步骤", "教程", "操作", "演示", "复盘"],
-  },
-  {
-    id: "data",
-    title: "数据导向",
-    description: "适合图表较多、指标明确的业务说明。",
-    useCases: ["项目汇报", "融资路演", "产品介绍"],
-    keywords: ["数据", "图表", "指标", "同比", "环比", "分析"],
-  },
-];
-
-const STYLE_LIBRARY = [
-  {
-    id: "trust-profile",
+    id: "profile",
+    label: "推荐 01",
     title: "高可信人物风",
-    source: "人物简介方向",
-    fit: ["CEO介绍", "品牌客户提案", "项目汇报"],
-    tones: ["稳重可信", "温和叙事"],
-    colors: "深墨绿 + 米白",
-    layout: "左图右文、履历卡片、信息层级清晰",
+    copy: "适合 CEO 介绍、个人品牌、公司简介。深色标题、清晰履历卡片、稳重可信。",
+    tag: "Profile deck",
   },
   {
-    id: "clean-tech",
-    title: "科技简报风",
-    source: "产品简报方向",
-    fit: ["产品介绍", "项目汇报", "融资路演"],
-    tones: ["科技简洁", "数据导向"],
-    colors: "石墨灰 + 冷白 + 少量亮色",
-    layout: "信息卡片、模块分区、图表留白充足",
+    id: "product",
+    label: "推荐 02",
+    title: "科技产品风",
+    copy: "适合产品介绍、项目汇报、客户提案。信息卡片、模块化结构、数据表达清晰。",
+    tag: "Product deck",
   },
   {
-    id: "editorial-story",
-    title: "编辑叙事风",
-    source: "品牌故事方向",
-    fit: ["品牌客户提案", "产品介绍", "CEO介绍"],
-    tones: ["温和叙事", "稳重可信"],
-    colors: "暖米色 + 炭黑 + 低饱和强调色",
-    layout: "大标题、留白明显、图片与文案并置",
-  },
-  {
-    id: "pitch-impact",
+    id: "pitch",
+    label: "推荐 03",
     title: "高冲击路演风",
-    source: "路演演示方向",
-    fit: ["融资路演", "品牌客户提案", "产品介绍"],
-    tones: ["高冲击路演", "数据导向"],
-    colors: "深底色 + 高对比亮色",
-    layout: "关键数字放大、结论先行、图表简练",
+    copy: "适合融资路演、增长汇报、商业计划。关键数字突出、页面节奏更强。",
+    tag: "Pitch deck",
   },
   {
-    id: "teaching-clear",
-    title: "清晰教学风",
-    source: "培训演示方向",
-    fit: ["培训课件", "项目汇报", "产品介绍"],
-    tones: ["清晰教学", "科技简洁"],
-    colors: "浅底色 + 重点分栏高亮",
-    layout: "步骤拆解、示意图、列表与提示框",
+    id: "custom",
+    label: "自定义",
+    title: "描述你的风格",
+    copy: "如果你已有明确方向，可以选择这一项，并在修改反馈里说明想要的视觉感觉。",
+    tag: "Custom",
   },
 ];
 
-const OUTLINE_LIBRARY = {
-  CEO介绍: {
-    "1页": ["人物定位与标题", "核心履历", "代表成绩", "合作价值"],
-    "5页": ["人物封面", "角色定位", "核心经历", "代表成绩", "合作价值与联系"],
-    "10页": ["人物封面", "背景与定位", "职业经历", "核心能力", "代表项目", "关键成绩", "行业观点", "合作价值", "公司关联", "结尾与联系"],
-    自动判断: ["人物定位与标题", "核心履历", "代表成绩", "合作价值"],
-  },
-  品牌客户提案: {
-    "1页": ["核心提案主题", "受众痛点", "解决方向", "合作收益"],
-    "5页": ["封面", "客户问题", "策略方向", "执行方案", "预期收益"],
-    "10页": ["封面", "客户背景", "问题拆解", "洞察", "策略框架", "执行方案", "内容结构", "案例或证据", "排期预算", "收尾与行动"],
-    自动判断: ["封面", "客户问题", "策略方向", "执行方案", "预期收益"],
-  },
-  产品介绍: {
-    "1页": ["产品定位", "核心功能", "关键价值", "行动入口"],
-    "5页": ["封面", "用户问题", "产品定位", "核心功能", "价值总结"],
-    "10页": ["封面", "市场背景", "用户问题", "产品定位", "功能模块", "使用流程", "关键数据", "案例证明", "商业价值", "收尾与行动"],
-    自动判断: ["封面", "用户问题", "产品定位", "核心功能", "价值总结"],
-  },
-  融资路演: {
-    "1页": ["机会点", "产品亮点", "增长信号", "融资诉求"],
-    "5页": ["封面", "市场机会", "产品方案", "增长证明", "融资计划"],
-    "10页": ["封面", "问题与机会", "市场规模", "产品方案", "增长数据", "商业模式", "竞争壁垒", "团队介绍", "融资用途", "结束页"],
-    自动判断: ["封面", "市场机会", "产品方案", "增长证明", "融资计划"],
-  },
-  项目汇报: {
-    "1页": ["项目目标", "完成情况", "关键数据", "下一步计划"],
-    "5页": ["封面", "目标回顾", "执行进展", "关键数据", "风险与下一步"],
-    "10页": ["封面", "目标背景", "阶段任务", "关键动作", "数据表现", "问题复盘", "经验总结", "资源需求", "下一步计划", "结束页"],
-    自动判断: ["封面", "目标回顾", "执行进展", "关键数据", "风险与下一步"],
-  },
-  培训课件: {
-    "1页": ["主题与对象", "核心知识点", "步骤方法", "课后行动"],
-    "5页": ["封面", "培训目标", "核心知识点", "步骤方法", "总结与行动"],
-    "10页": ["封面", "培训目标", "对象与场景", "知识点一", "知识点二", "案例演示", "常见错误", "操作步骤", "总结复盘", "课后行动"],
-    自动判断: ["封面", "培训目标", "核心知识点", "步骤方法", "总结与行动"],
-  },
+const state = {
+  screen: "intro",
+  projectName: "",
+  useCase: "",
+  audience: "",
+  referenceLinks: "",
+  pageCount: "5页以内",
+  selectedStyle: "profile",
+  customStyleDescription: "",
+  revisionMode: "sample",
+  revisionArea: "整体视觉",
+  revisionLevel: "轻微调整",
+  revisionText: "",
 };
 
-const EXAMPLE_DATA = {
-  projectName: "某公司 CEO 单页介绍",
-  useCase: "CEO介绍",
-  audienceOption: "品牌客户",
-  audienceCustom: "",
-  pageCount: "1页",
-  language: "中文",
-  materialsText: "人物截图、公司简介、3 条代表成绩、1 条行业定位说明。",
-  referenceLinks: "https://example.com/company-profile",
-  restrictions: "只读取截图里的文字和头像，不参考原截图版式、Logo 和旧 PPT 设计。",
-  outputs: ["PPTX", "PDF"],
-  imageFiles: [],
-  videoFiles: [],
-  docFiles: [],
-  selectedToneOption: "trusted",
-  toneCustom: "",
-  selectedStyleOption: "trust-profile",
-  styleCustom: "",
-};
+let autoTimer = null;
 
-const form = document.querySelector("#brief-form");
-const progressRow = document.querySelector("#progress-row");
-const wizardSteps = Array.from(document.querySelectorAll(".wizard-step"));
-const prevStepButton = document.querySelector("#prev-step");
-const nextStepButton = document.querySelector("#next-step");
-const generateResultButton = document.querySelector("#generate-result");
-const fillExampleButton = document.querySelector("#fill-example");
-const resetFormButton = document.querySelector("#reset-form");
-const toneOptionsContainer = document.querySelector("#tone-options");
-const toneCustomWrap = document.querySelector("#tone-custom-wrap");
-const toneCustomInput = document.querySelector("#tone-custom");
-const styleOptionsContainer = document.querySelector("#style-options");
-const styleCustomWrap = document.querySelector("#style-custom-wrap");
-const styleCustomInput = document.querySelector("#style-custom");
-const confirmList = document.querySelector("#confirm-list");
-const resultShell = document.querySelector("#result-shell");
-const resultSummary = document.querySelector("#result-summary");
-const resultText = document.querySelector("#result-text");
-const resultOverview = document.querySelector("#result-overview");
-const resultChecklist = document.querySelector("#result-checklist");
-const resultWorkflow = document.querySelector("#result-workflow");
-const resultOutline = document.querySelector("#result-outline");
-const copyOutputButton = document.querySelector("#copy-output");
-const editOutputButton = document.querySelector("#edit-output");
-const liveRegion = document.querySelector("#live-region");
-const audienceCustomInput = document.querySelector("#audience-custom");
-const imageFilesInput = document.querySelector("#image-files");
-const imageFilesSummary = document.querySelector("#image-files-summary");
-const videoFilesInput = document.querySelector("#video-files");
-const videoFilesSummary = document.querySelector("#video-files-summary");
-const docFilesInput = document.querySelector("#doc-files");
-const docFilesSummary = document.querySelector("#doc-files-summary");
-const previewStage = document.querySelector("#preview-stage");
-const previewStageText = document.querySelector("#preview-stage-text");
-const previewUsecase = document.querySelector("#preview-usecase");
-const previewOutputs = document.querySelector("#preview-outputs");
-const previewProject = document.querySelector("#preview-project");
-const previewAudience = document.querySelector("#preview-audience");
-const previewToneChip = document.querySelector("#preview-tone-chip");
-const previewStyleChip = document.querySelector("#preview-style-chip");
-const previewStyleMeta = document.querySelector("#preview-style-meta");
-const previewToneStrong = document.querySelector("#preview-tone-strong");
-const previewToneDesc = document.querySelector("#preview-tone-desc");
-const previewMaterialCount = document.querySelector("#preview-material-count");
-const previewRestrictions = document.querySelector("#preview-restrictions");
-const previewOutline = document.querySelector("#preview-outline");
-const previewStageStrip = document.querySelector("#preview-stage-strip");
-const previewCover = document.querySelector("#preview-cover");
-const previewSlideTag = document.querySelector("#preview-slide-tag");
-const previewPageCount = document.querySelector("#preview-page-count");
-const previewSlideTitle = document.querySelector("#preview-slide-title");
-const previewSlideSubtitle = document.querySelector("#preview-slide-subtitle");
-const previewSlidePoints = document.querySelector("#preview-slide-points");
-const previewSlideStats = document.querySelector("#preview-slide-stats");
+const headerStep = document.querySelector("#header-step");
+const headerTitle = document.querySelector("#header-title");
+const stepEyebrow = document.querySelector("#step-eyebrow");
+const screenTitle = document.querySelector("#screen-title");
+const screenCopy = document.querySelector("#screen-copy");
+const screenArea = document.querySelector("#screen-area");
+const primaryAction = document.querySelector("#primary-action");
+const secondaryAction = document.querySelector("#secondary-action");
+const tertiaryAction = document.querySelector("#tertiary-action");
+const toast = document.querySelector("#toast");
 
-let currentStep = 0;
-let latestResult = null;
-let selectedToneOption = null;
-let selectedStyleOption = null;
-let fileSnapshots = {
-  imageFiles: [],
-  videoFiles: [],
-  docFiles: [],
-};
+function getScreen() {
+  return screens.find((screen) => screen.id === state.screen) || screens[0];
+}
 
-function getDefaultState() {
-  return {
-    projectName: "",
-    useCase: "",
-    audienceOption: "品牌客户",
-    audienceCustom: "",
-    pageCount: "1页",
-    language: "中文",
-    materialsText: "",
-    referenceLinks: "",
-    restrictions: "",
-    outputs: ["PPTX"],
-    imageFiles: [],
-    videoFiles: [],
-    docFiles: [],
-    selectedToneOption: null,
-    toneCustom: "",
-    selectedStyleOption: null,
-    styleCustom: "",
+function getScreenIndex() {
+  const screenSteps = {
+    intro: 1,
+    upload: 2,
+    processing: 3,
+    style: 3,
+    sample: 4,
+    revision: state.revisionMode === "final" ? 6 : 5,
+    making: 6,
+    final: 6,
+    export: 7,
   };
+
+  return screenSteps[state.screen] || 1;
+}
+
+function getStyle() {
+  return styles.find((style) => style.id === state.selectedStyle) || styles[0];
 }
 
 function escapeHtml(value) {
@@ -356,1146 +156,430 @@ function escapeHtml(value) {
     .replaceAll("'", "&#39;");
 }
 
-function announce(message) {
-  liveRegion.textContent = message;
+function updateStateFromForm() {
+  const projectInput = document.querySelector("[name='projectName']");
+  const useCaseInput = document.querySelector("[name='useCase']");
+  const audienceInput = document.querySelector("[name='audience']");
+  const referenceLinksInput = document.querySelector("[name='referenceLinks']");
+  const pageCountInput = document.querySelector("[name='pageCount']");
+  const customStyleInput = document.querySelector("[name='customStyleDescription']");
+  const revisionAreaInput = document.querySelector("[name='revisionArea']");
+  const revisionLevelInput = document.querySelector("[name='revisionLevel']");
+  const revisionTextInput = document.querySelector("[name='revisionText']");
+
+  if (projectInput) state.projectName = projectInput.value.trim();
+  if (useCaseInput) state.useCase = useCaseInput.value;
+  if (audienceInput) state.audience = audienceInput.value.trim();
+  if (referenceLinksInput) state.referenceLinks = referenceLinksInput.value.trim();
+  if (pageCountInput) state.pageCount = pageCountInput.value;
+  if (customStyleInput) state.customStyleDescription = customStyleInput.value.trim();
+  if (revisionAreaInput) state.revisionArea = revisionAreaInput.value;
+  if (revisionLevelInput) state.revisionLevel = revisionLevelInput.value;
+  if (revisionTextInput) state.revisionText = revisionTextInput.value.trim();
 }
 
-function saveDraft() {
-  const draft = {
-    data: getRawFormState(),
-    currentStep,
-    result: latestResult,
-  };
-
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(draft));
+function renderIntro() {
+  return `
+    <div class="intro-grid">
+      <article class="intro-card">
+        <strong>1. 上传资料</strong>
+        <p>填写文案、场景、受众和输出要求。图片、视频和文档可以作为制作参考。</p>
+      </article>
+      <article class="intro-card">
+        <strong>2. 确认样稿</strong>
+        <p>先看一页代表性样稿，确认方向后再制作完整 PPT。</p>
+      </article>
+      <article class="intro-card">
+        <strong>3. 导出成稿</strong>
+        <p>完整成稿确认后，可导出 PPTX 或 PDF。</p>
+      </article>
+    </div>
+  `;
 }
 
-function loadDraft() {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
+function renderUpload() {
+  return `
+    <form class="field-grid" id="brief-form">
+      <label class="field">
+        <span>项目名称</span>
+        <input name="projectName" type="text" value="${escapeHtml(state.projectName)}" placeholder="例如：某公司 CEO 单页介绍" />
+      </label>
+      <label class="field">
+        <span>使用场景</span>
+        <select name="useCase">
+          ${["", "CEO介绍", "品牌客户提案", "产品介绍", "融资路演", "项目汇报", "培训课件"]
+            .map((item) => `<option value="${item}" ${state.useCase === item ? "selected" : ""}>${item || "请选择"}</option>`)
+            .join("")}
+        </select>
+      </label>
+      <label class="field">
+        <span>目标观众</span>
+        <input name="audience" type="text" value="${escapeHtml(state.audience)}" placeholder="例如：品牌客户、投资人、内部团队" />
+      </label>
+      <label class="field">
+        <span>页数预期</span>
+        <select name="pageCount">
+          ${["1页单页", "5页以内", "10页左右", "自动判断"]
+            .map((item) => `<option value="${item}" ${state.pageCount === item ? "selected" : ""}>${item}</option>`)
+            .join("")}
+        </select>
+      </label>
+      <label class="field full">
+        <span>文案 / 内容要点</span>
+        <textarea name="materials" rows="6" placeholder="填写已有文案、页面要点、数据结论或希望提炼的信息"></textarea>
+      </label>
+      <label class="field full">
+        <span>链接 / 线上资料</span>
+        <textarea name="referenceLinks" rows="4" placeholder="每行一个链接，例如官网、文章、网盘资料、视频地址">${escapeHtml(state.referenceLinks)}</textarea>
+        <small>可以补充网页、视频、云盘或其他线上参考资料。</small>
+      </label>
+      <label class="field">
+        <span>图片 / 截图</span>
+        <input type="file" multiple accept="image/*" />
+        <small>预览版仅展示入口，不会实际上传文件。</small>
+      </label>
+      <label class="field">
+        <span>文档 / PPT / PDF</span>
+        <input type="file" multiple accept=".pdf,.ppt,.pptx,.doc,.docx,.txt,.md" />
+        <small>正式版本会读取文件并生成内容提纲。</small>
+      </label>
+      <div class="field full">
+        <span>输出格式</span>
+        <div class="checkbox-row">
+          <label><input type="checkbox" checked />PPTX</label>
+          <label><input type="checkbox" />PDF</label>
+          <label><input type="checkbox" />讲稿</label>
+        </div>
+      </div>
+    </form>
+  `;
+}
 
-    if (!saved) {
-      return null;
+function renderProcessing() {
+  return `
+    <article class="processing-card">
+      <span class="loader" aria-hidden="true"></span>
+      <div>
+        <span>${state.screen === "making" ? "Creating" : "Preparing"}</span>
+        <strong>${state.screen === "making" ? "正在扩展完整 PPT 页面" : "正在整理资料并匹配模板"}</strong>
+        <p>${state.screen === "making" ? "我们正在根据样稿方向制作完整成稿。" : "我们会根据当前场景匹配合适的视觉方向。"}</p>
+      </div>
+    </article>
+  `;
+}
+
+function renderStyle() {
+  return `
+    <div class="style-grid">
+      ${styles
+        .map(
+          (style) => `
+            <button class="style-card ${state.selectedStyle === style.id ? "is-selected" : ""}" type="button" data-style="${style.id}">
+              <span>${style.label}</span>
+              <strong>${style.title}</strong>
+              <p>${style.copy}</p>
+              <div class="style-preview" aria-hidden="true"><i></i><i></i><i></i></div>
+            </button>
+          `,
+        )
+        .join("")}
+    </div>
+    ${
+      state.selectedStyle === "custom"
+        ? `
+          <label class="field full custom-style-field">
+            <span>描述你想要的风格</span>
+            <textarea name="customStyleDescription" rows="5" placeholder="例如：高级、简洁、偏科技感；用深色背景，标题要有冲击力，图片区域更大">${escapeHtml(state.customStyleDescription)}</textarea>
+            <small>描述越具体，样稿方向越接近你的预期。</small>
+          </label>
+        `
+        : ""
     }
-
-    return JSON.parse(saved);
-  } catch (error) {
-    return null;
-  }
+  `;
 }
 
-function clearDraft() {
-  localStorage.removeItem(STORAGE_KEY);
+function renderSample() {
+  const style = getStyle();
+  const styleTitle =
+    style.id === "custom" && state.customStyleDescription
+      ? `自定义风格：${state.customStyleDescription}`
+      : style.title;
+  return `
+    <div class="sample-layout">
+      <article class="sample-card">
+        <p class="eyebrow">${style.tag}</p>
+        <h3>${escapeHtml(state.projectName || "项目样稿标题")}</h3>
+        <p>${escapeHtml(state.useCase || "待选场景")} · ${escapeHtml(state.audience || "目标观众待确认")} · ${escapeHtml(state.pageCount)}</p>
+      </article>
+      <div class="sample-list">
+        <div><strong>样稿风格</strong><p>${escapeHtml(styleTitle)}</p></div>
+        <div><strong>页面结构</strong><p>封面、核心信息、价值说明、行动建议。</p></div>
+        <div><strong>确认后</strong><p>通过样稿后，我们会制作完整 PPT。</p></div>
+      </div>
+    </div>
+  `;
 }
 
-function getReferenceLinkCount(referenceLinks) {
-  return referenceLinks
-    .split("\n")
-    .map((item) => item.trim())
-    .filter(Boolean).length;
+function renderRevision() {
+  return `
+    <form class="revision-grid" id="revision-form">
+      <label class="field">
+        <span>修改区域</span>
+        <select name="revisionArea">
+          ${["整体视觉", "标题文案", "图片位置", "配色风格", "数据图表", "页面结构"]
+            .map((item) => `<option value="${item}" ${state.revisionArea === item ? "selected" : ""}>${item}</option>`)
+            .join("")}
+        </select>
+      </label>
+      <label class="field">
+        <span>修改强度</span>
+        <select name="revisionLevel">
+          ${["轻微调整", "局部重做", "整体重做"]
+            .map((item) => `<option value="${item}" ${state.revisionLevel === item ? "selected" : ""}>${item}</option>`)
+            .join("")}
+        </select>
+      </label>
+      <label class="field full">
+        <span>修改说明</span>
+        <textarea name="revisionText" rows="7" placeholder="例如：保留整体方向，但封面标题更简洁，人物图更大，颜色降低饱和度">${escapeHtml(state.revisionText)}</textarea>
+      </label>
+      <div class="revision-card full">
+        <strong>${state.revisionMode === "final" ? "成稿修改" : "样稿修改"}</strong>
+        <p>${state.revisionMode === "final" ? "提交后会回到成稿预览继续确认。" : "提交后会进入完整 PPT 制作。"}</p>
+      </div>
+    </form>
+  `;
 }
 
-function resolveAudience(raw) {
-  const selected = raw.audienceOption || "品牌客户";
-
-  if (selected === "其他") {
-    return raw.audienceCustom.trim() || "未填写";
-  }
-
-  return selected;
+function renderFinal() {
+  const items = ["封面", "项目背景", "核心方案", "关键数据", "执行计划", "结尾页"];
+  return `
+    <div class="final-grid">
+      ${items
+        .map(
+          (item, index) => `
+            <article class="final-page">
+              <strong>${String(index + 1).padStart(2, "0")} · ${item}</strong>
+              <p>${getStyle().title} · ${state.useCase || "项目内容"} · ${state.pageCount}</p>
+            </article>
+          `,
+        )
+        .join("")}
+    </div>
+  `;
 }
 
-function getRawFormState() {
-  const formData = new FormData(form);
+function renderExport() {
+  return `
+    <div class="download-grid">
+      <article class="download-card">
+        <span>PPTX</span>
+        <strong>可编辑 PPT 文件</strong>
+        <p>保留页面结构和可编辑文本，适合后续继续修改。</p>
+        <button class="button primary" type="button" data-export="pptx">下载 PPTX</button>
+      </article>
+      <article class="download-card">
+        <span>PDF</span>
+        <strong>预览 / 交付 PDF</strong>
+        <p>适合发送给客户、团队或外部合作方查看。</p>
+        <button class="button secondary" type="button" data-export="pdf">下载 PDF</button>
+      </article>
+      <article class="download-card">
+        <span>Notes</span>
+        <strong>讲稿说明</strong>
+        <p>可选导出每页讲稿和演示备注。</p>
+        <button class="button secondary" type="button" data-export="notes">生成讲稿</button>
+      </article>
+    </div>
+  `;
+}
 
-  return {
-    projectName: formData.get("projectName")?.trim() || "",
-    useCase: formData.get("useCase")?.trim() || "",
-    audienceOption:
-      form.querySelector('input[name="audienceOption"]:checked')?.value || "品牌客户",
-    audienceCustom: formData.get("audienceCustom")?.trim() || "",
-    pageCount: formData.get("pageCount") || "1页",
-    language: formData.get("language") || "中文",
-    materialsText: formData.get("materialsText")?.trim() || "",
-    referenceLinks: formData.get("referenceLinks")?.trim() || "",
-    restrictions: formData.get("restrictions")?.trim() || "",
-    outputs: formData.getAll("output"),
-    selectedToneOption,
-    toneCustom: formData.get("toneCustom")?.trim() || "",
-    selectedStyleOption,
-    styleCustom: formData.get("styleCustom")?.trim() || "",
-    imageFiles: [...fileSnapshots.imageFiles],
-    videoFiles: [...fileSnapshots.videoFiles],
-    docFiles: [...fileSnapshots.docFiles],
+function renderScreenBody() {
+  if (state.screen === "intro") return renderIntro();
+  if (state.screen === "upload") return renderUpload();
+  if (state.screen === "processing" || state.screen === "making") return renderProcessing();
+  if (state.screen === "style") return renderStyle();
+  if (state.screen === "sample") return renderSample();
+  if (state.screen === "revision") return renderRevision();
+  if (state.screen === "final") return renderFinal();
+  if (state.screen === "export") return renderExport();
+  return "";
+}
+
+function updateActions() {
+  secondaryAction.hidden = state.screen === "intro" || state.screen === "processing" || state.screen === "making";
+  tertiaryAction.hidden = state.screen !== "sample";
+  primaryAction.hidden = state.screen === "processing" || state.screen === "making";
+
+  const primaryLabels = {
+    intro: "开始制作",
+    upload: "提交资料",
+    style: "确认风格",
+    sample: "样稿通过，制作全套",
+    revision: state.revisionMode === "final" ? "提交成稿修改" : "提交样稿修改",
+    final: "无需修改，去导出",
+    export: "完成",
   };
+
+  const secondaryLabels = {
+    upload: "返回介绍",
+    style: "重新匹配",
+    sample: "返回重选风格",
+    revision: state.revisionMode === "final" ? "返回成稿预览" : "返回样稿确认",
+    final: "需要修改",
+    export: "返回成稿预览",
+  };
+
+  primaryAction.textContent = primaryLabels[state.screen] || "下一步";
+  secondaryAction.textContent = secondaryLabels[state.screen] || "返回";
 }
 
-function getOutline(useCase, pageCount) {
-  const outlineMap = OUTLINE_LIBRARY[useCase] || OUTLINE_LIBRARY.项目汇报;
-  return outlineMap[pageCount] || outlineMap.自动判断;
+function render() {
+  const screen = getScreen();
+  const index = getScreenIndex();
+  headerStep.textContent = `第 ${index} 步`;
+  headerTitle.textContent = screen.header;
+  stepEyebrow.textContent = screen.eyebrow;
+  screenTitle.textContent = screen.title;
+  screenCopy.textContent = screen.copy;
+  screenArea.innerHTML = renderScreenBody();
+  updateActions();
 }
 
-function buildSignalText(raw) {
+function goTo(screenId) {
+  clearTimeout(autoTimer);
+  updateStateFromForm();
+  state.screen = screenId;
+  hideToast();
+  render();
+
+  if (screenId === "processing") {
+    autoTimer = setTimeout(() => goTo("style"), 900);
+  }
+
+  if (screenId === "making") {
+    autoTimer = setTimeout(() => goTo("final"), 900);
+  }
+
+  document.querySelector("#top")?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function getExportBaseName() {
+  return (state.projectName || "PPT制作项目")
+    .replace(/[\\/:*?"<>|]/g, "-")
+    .replace(/\s+/g, "-")
+    .slice(0, 48);
+}
+
+function buildExportContent(type) {
+  const style = getStyle();
+  const styleText =
+    style.id === "custom" && state.customStyleDescription
+      ? state.customStyleDescription
+      : style.title;
+
   return [
-    raw.useCase,
-    raw.materialsText,
-    raw.referenceLinks,
-    raw.imageFiles.join(" "),
-    raw.videoFiles.join(" "),
-    raw.docFiles.join(" "),
-  ]
-    .join(" ")
-    .toLowerCase();
-}
-
-function countKeywordMatches(signal, keywords) {
-  return keywords.reduce((count, keyword) => {
-    return count + (signal.includes(keyword.toLowerCase()) ? 1 : 0);
-  }, 0);
-}
-
-function getToneRecommendations(raw = getRawFormState()) {
-  const signal = buildSignalText(raw);
-
-  return TONE_LIBRARY.map((tone) => {
-    let score = 0;
-
-    if (tone.useCases.includes(raw.useCase)) {
-      score += 3;
-    }
-
-    score += countKeywordMatches(signal, tone.keywords);
-
-    if (raw.videoFiles.length && tone.id === "impact") {
-      score += 1;
-    }
-
-    if (raw.docFiles.length && (tone.id === "trusted" || tone.id === "data")) {
-      score += 1;
-    }
-
-    if (raw.imageFiles.length && (tone.id === "story" || tone.id === "trusted")) {
-      score += 1;
-    }
-
-    if (raw.referenceLinks && (tone.id === "tech" || tone.id === "data")) {
-      score += 1;
-    }
-
-    return { ...tone, score };
-  })
-    .sort((left, right) => right.score - left.score)
-    .slice(0, 3);
-}
-
-function resolveTone(raw, toneRecommendations = getToneRecommendations(raw)) {
-  if (raw.selectedToneOption === "custom") {
-    return {
-      id: "custom",
-      label: raw.toneCustom || "未填写",
-      description: "自定义调性",
-    };
-  }
-
-  const fallback = toneRecommendations[0];
-  const selected =
-    toneRecommendations.find((tone) => tone.id === raw.selectedToneOption) || fallback;
-
-  return {
-    id: selected?.id || "trusted",
-    label: selected?.title || "未选择",
-    description: selected?.description || "",
-  };
-}
-
-function matchesToneIntent(styleTone, selectedTone) {
-  if (styleTone === selectedTone) {
-    return true;
-  }
-
-  if (selectedTone.includes("科技") && styleTone.includes("科技")) {
-    return true;
-  }
-
-  if (selectedTone.includes("路演") && styleTone.includes("路演")) {
-    return true;
-  }
-
-  if (selectedTone.includes("叙事") && styleTone.includes("叙事")) {
-    return true;
-  }
-
-  if (selectedTone.includes("教学") && styleTone.includes("教学")) {
-    return true;
-  }
-
-  if (selectedTone.includes("数据") && styleTone.includes("数据")) {
-    return true;
-  }
-
-  if (selectedTone.includes("稳重") && styleTone.includes("稳重")) {
-    return true;
-  }
-
-  return false;
-}
-
-function getStyleRecommendations(raw = getRawFormState(), selectedToneLabel) {
-  const signal = `${buildSignalText(raw)} ${selectedToneLabel || ""}`;
-
-  return STYLE_LIBRARY.map((style) => {
-    let score = 0;
-
-    if (style.fit.includes(raw.useCase)) {
-      score += 3;
-    }
-
-    style.tones.forEach((tone) => {
-      if (matchesToneIntent(tone, selectedToneLabel || "")) {
-        score += 2;
-      }
-    });
-
-    if (raw.imageFiles.length && (style.id === "trust-profile" || style.id === "editorial-story")) {
-      score += 1;
-    }
-
-    if (raw.videoFiles.length && style.id === "pitch-impact") {
-      score += 1;
-    }
-
-    if (raw.docFiles.length && (style.id === "clean-tech" || style.id === "trust-profile")) {
-      score += 1;
-    }
-
-    if (signal.includes("品牌") && style.id === "editorial-story") {
-      score += 1;
-    }
-
-    if (signal.includes("数据") && style.id === "clean-tech") {
-      score += 1;
-    }
-
-    return { ...style, score };
-  })
-    .sort((left, right) => right.score - left.score)
-    .slice(0, 3);
-}
-
-function resolveStyle(raw, styleRecommendations) {
-  if (raw.selectedStyleOption === "custom") {
-    return {
-      id: "custom",
-      label: raw.styleCustom || "未填写",
-      source: "自定义",
-      colors: "自定义",
-      layout: "自定义",
-    };
-  }
-
-  const fallback = styleRecommendations[0];
-  const selected =
-    styleRecommendations.find((style) => style.id === raw.selectedStyleOption) || fallback;
-
-  return {
-    id: selected?.id || "trust-profile",
-    label: selected?.title || "未选择",
-    source: selected?.source || "",
-    colors: selected?.colors || "",
-    layout: selected?.layout || "",
-  };
-}
-
-function getNormalizedState(raw = getRawFormState()) {
-  const projectName = raw.projectName || (raw.useCase ? `${raw.useCase}项目` : "未命名项目");
-  const audience = resolveAudience(raw);
-  const toneRecommendations = getToneRecommendations(raw);
-  const tone = resolveTone(raw, toneRecommendations);
-  const styleRecommendations = getStyleRecommendations(raw, tone.label);
-  const style = resolveStyle(raw, styleRecommendations);
-
-  return {
-    ...raw,
-    projectName,
-    audience,
-    tone,
-    style,
-    outline: getOutline(raw.useCase, raw.pageCount),
-    useCaseNote: raw.useCase
-      ? USE_CASE_NOTES[raw.useCase]
-      : "请先选择使用场景，系统会据此推荐更贴近任务的结构和风格。",
-  };
-}
-
-function fillForm(data) {
-  const merged = {
-    ...getDefaultState(),
-    ...data,
-  };
-
-  form.projectName.value = merged.projectName;
-  form.useCase.value = merged.useCase;
-  form.pageCount.value = merged.pageCount;
-  form.language.value = merged.language;
-  form.materialsText.value = merged.materialsText;
-  form.referenceLinks.value = merged.referenceLinks;
-  form.restrictions.value = merged.restrictions;
-  toneCustomInput.value = merged.toneCustom;
-  styleCustomInput.value = merged.styleCustom;
-
-  form.querySelectorAll('input[name="audienceOption"]').forEach((input) => {
-    input.checked = input.value === merged.audienceOption;
-  });
-
-  audienceCustomInput.value = merged.audienceCustom;
-
-  const outputSet = new Set(merged.outputs);
-  form.querySelectorAll('input[name="output"]').forEach((input) => {
-    input.checked = outputSet.has(input.value);
-  });
-
-  fileSnapshots = {
-    imageFiles: [...(merged.imageFiles || [])],
-    videoFiles: [...(merged.videoFiles || [])],
-    docFiles: [...(merged.docFiles || [])],
-  };
-
-  selectedToneOption = merged.selectedToneOption || null;
-  selectedStyleOption = merged.selectedStyleOption || null;
-  updateAudienceCustomVisibility();
-  updateAllFileSummaries();
-}
-
-function setFileSnapshot(key, files) {
-  fileSnapshots[key] = Array.from(files).map((file) => file.name);
-  updateAllFileSummaries();
-}
-
-function formatFileSummary(items) {
-  if (!items.length) {
-    return "未选择文件";
-  }
-
-  return items.join("、");
-}
-
-function updateAllFileSummaries() {
-  imageFilesSummary.textContent = formatFileSummary(fileSnapshots.imageFiles);
-  videoFilesSummary.textContent = formatFileSummary(fileSnapshots.videoFiles);
-  docFilesSummary.textContent = formatFileSummary(fileSnapshots.docFiles);
-}
-
-function updateAudienceCustomVisibility() {
-  const isOther = form.querySelector('input[name="audienceOption"]:checked')?.value === "其他";
-  audienceCustomInput.hidden = !isOther;
-}
-
-function getSourceLabels(raw) {
-  const labels = [];
-  const linkCount = getReferenceLinkCount(raw.referenceLinks);
-
-  if (raw.materialsText) {
-    labels.push("文字素材");
-  }
-
-  if (linkCount) {
-    labels.push(`${linkCount} 个链接`);
-  }
-
-  if (raw.imageFiles.length) {
-    labels.push(`${raw.imageFiles.length} 个图片/截图`);
-  }
-
-  if (raw.videoFiles.length) {
-    labels.push(`${raw.videoFiles.length} 个视频`);
-  }
-
-  if (raw.docFiles.length) {
-    labels.push(`${raw.docFiles.length} 个文档/PPT`);
-  }
-
-  return labels;
-}
-
-function buildMaterialSummary(raw) {
-  const labels = getSourceLabels(raw);
-  return labels.join(" · ") || "暂未提供素材";
-}
-
-function buildRestrictionsText(raw) {
-  return raw.restrictions || "暂无额外限制，默认允许重组内容但不虚构信息。";
-}
-
-function renderProgress() {
-  progressRow.innerHTML = STEP_CONFIG.map((step, index) => {
-    const stateClass =
-      index < currentStep ? "is-complete" : index === currentStep ? "is-current" : "";
-
-    return `
-      <div class="progress-chip ${stateClass}">
-        <strong>步骤 ${index + 1}</strong>
-        <span>${escapeHtml(step.title)}</span>
-        <small>${escapeHtml(step.hint)}</small>
-      </div>
-    `;
-  }).join("");
-}
-
-function renderToneOptions() {
-  const raw = getRawFormState();
-  const tones = getToneRecommendations(raw);
-
-  if (selectedToneOption !== "custom" && !tones.some((tone) => tone.id === selectedToneOption)) {
-    selectedToneOption = tones[0]?.id || null;
-  }
-
-  toneOptionsContainer.innerHTML = [
-    ...tones.map((tone, index) => {
-      const isSelected = selectedToneOption === tone.id;
-
-      return `
-        <button class="choice-card ${isSelected ? "is-selected" : ""}" type="button" data-tone-option="${tone.id}">
-          <span class="choice-rank">推荐 ${index + 1}</span>
-          <h4>${escapeHtml(tone.title)}</h4>
-          <p>${escapeHtml(tone.description)}</p>
-        </button>
-      `;
-    }),
-    `
-      <button class="choice-card ${selectedToneOption === "custom" ? "is-selected" : ""}" type="button" data-tone-option="custom">
-        <span class="choice-rank">Custom</span>
-        <h4>自定义输入</h4>
-        <p>自己填写你想要的表达调性。</p>
-      </button>
-    `,
-  ].join("");
-
-  toneCustomWrap.hidden = selectedToneOption !== "custom";
-}
-
-function renderStyleOptions() {
-  const raw = getRawFormState();
-  const tone = resolveTone(raw, getToneRecommendations(raw));
-  const styles = getStyleRecommendations(raw, tone.label);
-
-  if (selectedStyleOption !== "custom" && !styles.some((style) => style.id === selectedStyleOption)) {
-    selectedStyleOption = styles[0]?.id || null;
-  }
-
-  styleOptionsContainer.innerHTML = [
-    ...styles.map((style, index) => {
-      const isSelected = selectedStyleOption === style.id;
-
-      return `
-        <button class="style-card ${isSelected ? "is-selected" : ""}" type="button" data-style-option="${style.id}">
-          <span class="choice-rank">风格 ${index + 1}</span>
-          <div class="style-card-head">
-            <h4>${escapeHtml(style.title)}</h4>
-          </div>
-          <div class="style-facts">
-            <p><strong>方向：</strong>${escapeHtml(style.source)}</p>
-            <p><strong>色彩：</strong>${escapeHtml(style.colors)}</p>
-            <p><strong>版式：</strong>${escapeHtml(style.layout)}</p>
-          </div>
-        </button>
-      `;
-    }),
-    `
-      <button class="style-card ${selectedStyleOption === "custom" ? "is-selected" : ""}" type="button" data-style-option="custom">
-        <span class="choice-rank">Custom</span>
-        <div class="style-card-head">
-          <h4>自定义输入</h4>
-        </div>
-        <div class="style-facts">
-          <p><strong>说明：</strong>自己填写希望呈现的风格方向。</p>
-        </div>
-      </button>
-    `,
-  ].join("");
-
-  styleCustomWrap.hidden = selectedStyleOption !== "custom";
-}
-
-function renderConfirmList() {
-  const normalized = getNormalizedState();
-
-  const rows = [
-    ["项目名称", normalized.projectName],
-    ["使用场景", normalized.useCase || "未填写"],
-    ["目标观众", normalized.audience],
-    ["页数预期", normalized.pageCount],
-    ["语言", normalized.language],
-    ["素材概况", buildMaterialSummary(normalized)],
-    ["表达调性", normalized.tone.label],
-    ["已选风格", normalized.style.label],
-    [
-      "风格线索",
-      normalized.style.colors
-        ? `${normalized.style.colors} / ${normalized.style.layout}`
-        : normalized.useCaseNote,
-    ],
-    ["输出格式", normalized.outputs.join(" / ") || "未选择"],
-  ];
-
-  confirmList.innerHTML = rows
-    .map(
-      ([label, value]) => `
-        <div>
-          <dt>${escapeHtml(label)}</dt>
-          <dd>${escapeHtml(value)}</dd>
-        </div>
-      `,
-    )
-    .join("");
-}
-
-function getPreviewTheme(styleId, toneId) {
-  if (STYLE_THEMES[styleId]) {
-    return STYLE_THEMES[styleId];
-  }
-
-  const toneFallback = {
-    trusted: STYLE_THEMES["trust-profile"],
-    tech: STYLE_THEMES["clean-tech"],
-    impact: STYLE_THEMES["pitch-impact"],
-    story: STYLE_THEMES["editorial-story"],
-    teaching: STYLE_THEMES["teaching-clear"],
-    data: STYLE_THEMES["clean-tech"],
-    custom: STYLE_THEMES["trust-profile"],
-  };
-
-  return toneFallback[toneId] || STYLE_THEMES["trust-profile"];
-}
-
-function applyPreviewTheme(theme) {
-  previewCover.style.setProperty("--preview-bg", theme.bg);
-  previewCover.style.setProperty("--preview-text", theme.text);
-  previewCover.style.setProperty("--preview-muted", theme.muted);
-  previewCover.style.setProperty("--preview-surface", theme.surface);
-  previewCover.style.setProperty("--preview-accent", theme.accent);
-}
-
-function describeOutlineItem(title, normalized) {
-  if (title.includes("封面") || title.includes("标题")) {
-    return `用一句话点明主题，让 ${normalized.audience} 在第一眼就知道这套内容的用途。`;
-  }
-
-  if (title.includes("背景") || title.includes("问题") || title.includes("痛点")) {
-    return "先把背景和问题说清楚，再承接后面的方案与证据。";
-  }
-
-  if (title.includes("定位") || title.includes("角色")) {
-    return "突出最核心的定位信息，避免把简介写成流水账。";
-  }
-
-  if (title.includes("履历") || title.includes("经历") || title.includes("团队")) {
-    return "用可信背书和关键节点增强说服力，控制信息密度。";
-  }
-
-  if (title.includes("功能") || title.includes("方案") || title.includes("步骤")) {
-    return "建议拆成 2 到 4 个结构化模块，每个模块只讲一个重点。";
-  }
-
-  if (
-    title.includes("成绩") ||
-    title.includes("数据") ||
-    title.includes("增长") ||
-    title.includes("证明") ||
-    title.includes("收益")
-  ) {
-    return "优先放最能打的证据，数字、对比和结论要同屏出现。";
-  }
-
-  if (
-    title.includes("行动") ||
-    title.includes("联系") ||
-    title.includes("融资") ||
-    title.includes("计划") ||
-    title.includes("结束")
-  ) {
-    return "明确下一步动作，让这页真正承接决策、转化或沟通动作。";
-  }
-
-  return `围绕“${title}”输出 1 个结论、1 组证据和 1 个视觉重点。`;
-}
-
-function buildStageStripMarkup(hasResult) {
-  const currentStageIndex = hasResult ? DELIVERY_STAGES.length - 1 : currentStep;
-
-  return DELIVERY_STAGES.map((stage, index) => {
-    let stateClass = "";
-
-    if (index < currentStageIndex) {
-      stateClass = "is-complete";
-    }
-
-    if (index === currentStageIndex) {
-      stateClass = `${stateClass} is-current`.trim();
-    }
-
-    return `
-      <div class="stage-item ${stateClass}">
-        <span class="outline-index">${String(index + 1).padStart(2, "0")}</span>
-        <div>
-          <strong>${escapeHtml(stage.label)}</strong>
-          <p>${escapeHtml(stage.note)}</p>
-        </div>
-      </div>
-    `;
-  }).join("");
-}
-
-function renderLivePreview() {
-  const normalized = getNormalizedState();
-  const materialLabels = getSourceLabels(normalized);
-  const theme = getPreviewTheme(normalized.style.id, normalized.tone.id);
-  const stageMeta = latestResult
-    ? {
-        title: "交付 brief 已生成",
-        note: "这份 brief 已可以直接进入 1 页样稿和后续扩稿。",
-      }
-    : STAGE_CONFIG[currentStep];
-
-  applyPreviewTheme(theme);
-
-  previewStage.textContent = stageMeta.title;
-  previewStageText.textContent = stageMeta.note;
-  previewUsecase.textContent = normalized.useCase
-    ? `${normalized.useCase} · ${normalized.language}`
-    : `待选场景 · ${normalized.language}`;
-  previewOutputs.textContent = normalized.outputs.length
-    ? normalized.outputs.join(" / ")
-    : "输出待定";
-  previewProject.textContent = normalized.projectName;
-  previewAudience.textContent = `面向 ${normalized.audience} · ${normalized.pageCount}`;
-  previewToneChip.textContent = normalized.tone.label;
-  previewStyleChip.textContent = normalized.style.label;
-  previewStyleMeta.textContent = normalized.style.colors
-    ? `${normalized.style.colors} / ${normalized.style.layout}`
-    : normalized.useCaseNote;
-  previewToneStrong.textContent = normalized.tone.label;
-  previewToneDesc.textContent = normalized.tone.description || normalized.useCaseNote;
-  previewMaterialCount.textContent = materialLabels.length
-    ? `${materialLabels.length} 类素材`
-    : "待补素材";
-  previewRestrictions.textContent = normalized.restrictions
-    ? normalized.restrictions
-    : materialLabels.join(" · ") || "至少填写 1 类素材来源。";
-  previewSlideTag.textContent = normalized.style.source || "样稿预览";
-  previewPageCount.textContent = normalized.pageCount === "1页" ? "1 页样稿" : normalized.pageCount;
-  previewSlideTitle.textContent = normalized.projectName;
-  previewSlideSubtitle.textContent = `${normalized.useCase || "待选场景"} · ${normalized.language} · 面向${normalized.audience}`;
-
-  previewSlidePoints.innerHTML = normalized.outline
-    .slice(0, 3)
-    .map((item, index) => {
-      return `
-        <div class="mock-point">
-          <span>${String(index + 1).padStart(2, "0")}</span>
-          <p>${escapeHtml(item)}</p>
-        </div>
-      `;
-    })
-    .join("");
-
-  const statItems = [
-    {
-      label: "输出",
-      value: normalized.outputs.length ? normalized.outputs.join(" / ") : "待定",
-    },
-    {
-      label: "受众",
-      value: normalized.audience,
-    },
-    {
-      label: "素材",
-      value: materialLabels.length ? `${materialLabels.length} 类输入` : "待补",
-    },
-  ];
-
-  previewSlideStats.innerHTML = statItems
-    .map((item) => {
-      return `
-        <div class="mock-stat">
-          <strong>${escapeHtml(item.label)}</strong>
-          <p>${escapeHtml(item.value)}</p>
-        </div>
-      `;
-    })
-    .join("");
-
-  const previewOutlineItems = normalized.outline.slice(0, 5);
-  const extraOutlineCount = Math.max(0, normalized.outline.length - previewOutlineItems.length);
-
-  previewOutline.innerHTML = [
-    ...previewOutlineItems.map((item, index) => {
-      return `
-        <div class="outline-item">
-          <span class="outline-index">${String(index + 1).padStart(2, "0")}</span>
-          <div>
-            <strong>${escapeHtml(item)}</strong>
-            <p>${escapeHtml(describeOutlineItem(item, normalized))}</p>
-          </div>
-        </div>
-      `;
-    }),
-    extraOutlineCount
-      ? `
-        <div class="outline-item">
-          <span class="outline-index">+${extraOutlineCount}</span>
-          <div>
-            <strong>其余页面</strong>
-            <p>完整输出中还会补充 ${extraOutlineCount} 个页面节点。</p>
-          </div>
-        </div>
-      `
-      : "",
-  ].join("");
-
-  previewStageStrip.innerHTML = buildStageStripMarkup(Boolean(latestResult));
-}
-
-function renderAllDerivedViews() {
-  renderProgress();
-  renderToneOptions();
-  renderStyleOptions();
-  renderConfirmList();
-  renderLivePreview();
-}
-
-function showStep(stepIndex) {
-  currentStep = stepIndex;
-
-  wizardSteps.forEach((step, index) => {
-    step.hidden = index !== currentStep;
-  });
-
-  prevStepButton.hidden = currentStep === 0;
-  nextStepButton.hidden = currentStep === STEP_CONFIG.length - 1;
-  generateResultButton.hidden = currentStep !== STEP_CONFIG.length - 1;
-
-  updateAudienceCustomVisibility();
-  renderAllDerivedViews();
-  saveDraft();
-}
-
-function renderResult(result) {
-  if (!result) {
-    resultShell.hidden = true;
-    resultSummary.innerHTML = "";
-    resultOverview.textContent = "";
-    resultChecklist.innerHTML = "";
-    resultWorkflow.innerHTML = "";
-    resultOutline.innerHTML = "";
-    resultText.textContent = "";
-    return;
-  }
-
-  resultShell.hidden = false;
-  resultSummary.innerHTML = result.summary
-    .filter(Boolean)
-    .map((item) => `<span class="summary-pill">${escapeHtml(item)}</span>`)
-    .join("");
-  resultOverview.textContent = result.overview;
-  resultChecklist.innerHTML = result.checklist
-    .map((item) => `<li>${escapeHtml(item)}</li>`)
-    .join("");
-  resultWorkflow.innerHTML = result.workflow
-    .map((item) => `<li><strong>${escapeHtml(item.title)}</strong> ${escapeHtml(item.note)}</li>`)
-    .join("");
-  resultOutline.innerHTML = result.outline
-    .map((item, index) => {
-      return `
-        <article class="result-outline-item">
-          <span class="outline-index">${String(index + 1).padStart(2, "0")}</span>
-          <div>
-            <h4>${escapeHtml(item.title)}</h4>
-            <p>${escapeHtml(item.note)}</p>
-          </div>
-        </article>
-      `;
-    })
-    .join("");
-  resultText.textContent = result.text;
-}
-
-function resetResult() {
-  latestResult = null;
-  renderResult(null);
-  renderLivePreview();
-}
-
-function buildResult() {
-  const normalized = getNormalizedState();
-  const materialSummary = buildMaterialSummary(normalized);
-  const outputText = normalized.outputs.join(" / ");
-  const outline = normalized.outline.map((title) => ({
-    title,
-    note: describeOutlineItem(title, normalized),
-  }));
-  const workflow = [
-    {
-      title: "锁定素材边界",
-      note:
-        normalized.restrictions ||
-        `优先使用 ${materialSummary}，未明确允许的旧版式、Logo 和样张默认不复用。`,
-    },
-    {
-      title: "先做 1 页代表性样稿",
-      note: `以“${normalized.style.label}”为主方向，先验证标题层级、图文比例和信息密度。`,
-    },
-    {
-      title: "结构确认后扩展全稿",
-      note: `按照 ${normalized.pageCount} 预期，把大纲中的核心页面逐页展开，保持统一视觉系统。`,
-    },
-    {
-      title: `导出 ${outputText}`,
-      note: `完成校对后输出 ${outputText}，必要时同步整理讲稿和最终 PDF。`,
-    },
-  ];
-  const checklist = [
-    `目标观众：${normalized.audience}`,
-    `必用输入：${materialSummary}`,
-    `表达调性：${normalized.tone.label}`,
-    `视觉方向：${normalized.style.label}${normalized.style.colors ? `，建议色彩 ${normalized.style.colors}` : ""}`,
-    `使用限制：${buildRestrictionsText(normalized)}`,
-  ];
-  const overview = `这是一份面向 ${normalized.audience} 的 ${normalized.useCase || "PPT"} brief，建议先以“${normalized.style.label}”制作 1 页代表性样稿，确认信息密度和视觉方向后，再扩展到 ${normalized.pageCount} 版本并导出 ${outputText}。`;
-
-  const text = [
-    "项目概览：",
-    `- 项目名称：${normalized.projectName}`,
-    `- 使用场景：${normalized.useCase || "未填写"}`,
-    `- 目标观众：${normalized.audience}`,
-    `- 页数预期：${normalized.pageCount}`,
-    `- 语言：${normalized.language}`,
+    `导出类型：${type.toUpperCase()}`,
+    `项目名称：${state.projectName || "未填写"}`,
+    `使用场景：${state.useCase || "未选择"}`,
+    `目标观众：${state.audience || "未填写"}`,
+    `页数预期：${state.pageCount}`,
+    `风格方向：${styleText}`,
     "",
-    "素材与限制：",
-    `- 可用素材：${materialSummary}`,
-    `- 文字素材：${normalized.materialsText || "无"}`,
-    `- 参考链接：${normalized.referenceLinks || "无"}`,
-    `- 图片 / 截图：${normalized.imageFiles.join("、") || "无"}`,
-    `- 视频 / 录屏：${normalized.videoFiles.join("、") || "无"}`,
-    `- 文档 / PPT：${normalized.docFiles.join("、") || "无"}`,
-    `- 使用限制：${buildRestrictionsText(normalized)}`,
+    "成稿页面：",
+    "1. 封面",
+    "2. 项目背景",
+    "3. 核心方案",
+    "4. 关键数据",
+    "5. 执行计划",
+    "6. 结尾页",
     "",
-    "风格建议：",
-    `- 表达调性：${normalized.tone.label}`,
-    `- 已选风格：${normalized.style.label}`,
-    `- 风格来源：${normalized.style.source || "待确认"}`,
-    `- 色彩方向：${normalized.style.colors || "待确认"}`,
-    `- 版式方向：${normalized.style.layout || "待确认"}`,
+    "最近修改反馈：",
+    `- 修改区域：${state.revisionArea}`,
+    `- 修改强度：${state.revisionLevel}`,
+    `- 修改说明：${state.revisionText || "无"}`,
     "",
-    "页面大纲建议：",
-    ...outline.map((item, index) => `${index + 1}. ${item.title}：${item.note}`),
-    "",
-    "执行路径：",
-    ...workflow.map((item, index) => `${index + 1}. ${item.title}：${item.note}`),
-    "",
-    "交付要求：",
-    `- 输出格式：${outputText}`,
-    "- 建议流程：先做 1 页样稿，确认通过后再制作完整 PPT。",
+    "说明：当前网页为公开预览版，下载文件用于确认外部流程与交付信息。",
   ].join("\n");
-
-  return {
-    text,
-    overview,
-    checklist,
-    workflow,
-    outline,
-    summary: [
-      normalized.useCase || "未选场景",
-      normalized.pageCount,
-      normalized.tone.label,
-      normalized.style.label,
-      outputText,
-    ],
-  };
 }
 
-function focusAndReport(field, message) {
-  if (field?.setCustomValidity) {
-    field.setCustomValidity(message);
-    field.reportValidity?.();
-    field.setCustomValidity("");
-  }
-
-  field?.focus?.();
-  announce(message);
+function showToast(message) {
+  toast.textContent = message;
+  toast.hidden = false;
 }
 
-function hasMaterialSource(raw) {
-  return Boolean(
-    raw.materialsText ||
-      raw.referenceLinks ||
-      raw.imageFiles.length ||
-      raw.videoFiles.length ||
-      raw.docFiles.length,
-  );
+function hideToast() {
+  toast.hidden = true;
+  toast.textContent = "";
 }
 
-function validateStep(stepIndex) {
-  const raw = getRawFormState();
-
-  if (stepIndex === 0) {
-    if (!raw.useCase) {
-      focusAndReport(form.useCase, "请选择使用场景。");
-      return false;
-    }
-
-    if (raw.audienceOption === "其他" && !raw.audienceCustom) {
-      focusAndReport(audienceCustomInput, "请填写其他目标观众。");
-      return false;
-    }
-  }
-
-  if (stepIndex === 1 && !hasMaterialSource(raw)) {
-    focusAndReport(form.materialsText, "请至少填写一种素材来源。");
-    return false;
-  }
-
-  if (stepIndex === 2) {
-    if (!selectedToneOption) {
-      announce("请选择一个表达调性。");
-      return false;
-    }
-
-    if (selectedToneOption === "custom" && !raw.toneCustom) {
-      focusAndReport(toneCustomInput, "请填写自定义调性。");
-      return false;
-    }
-
-    if (!selectedStyleOption) {
-      announce("请选择一个风格。");
-      return false;
-    }
-
-    if (selectedStyleOption === "custom" && !raw.styleCustom) {
-      focusAndReport(styleCustomInput, "请填写自定义风格。");
-      return false;
-    }
-  }
-
-  if (stepIndex === 3 && raw.outputs.length === 0) {
-    focusAndReport(
-      form.querySelector('input[name="output"]'),
-      "请至少选择一种输出格式。",
-    );
-    return false;
-  }
-
-  return true;
+function downloadExport(type) {
+  updateStateFromForm();
+  const content = buildExportContent(type);
+  const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `${getExportBaseName()}-${type}.txt`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+  showToast(`${type.toUpperCase()} 预览文件已生成。`);
 }
 
-function copyText(text) {
-  if (navigator.clipboard && window.isSecureContext) {
-    return navigator.clipboard.writeText(text).then(() => true);
-  }
+function handlePrimary() {
+  updateStateFromForm();
 
-  const textarea = document.createElement("textarea");
-  textarea.value = text;
-  textarea.setAttribute("readonly", "");
-  textarea.style.position = "absolute";
-  textarea.style.left = "-9999px";
-  document.body.appendChild(textarea);
-  textarea.select();
-  const copied = document.execCommand("copy");
-  document.body.removeChild(textarea);
-  return Promise.resolve(copied);
+  if (state.screen === "intro") goTo("upload");
+  else if (state.screen === "upload") goTo("processing");
+  else if (state.screen === "style") goTo("sample");
+  else if (state.screen === "sample") goTo("making");
+  else if (state.screen === "revision") {
+    if (state.revisionMode === "final") goTo("final");
+    else goTo("making");
+  } else if (state.screen === "final") goTo("export");
+  else if (state.screen === "export") goTo("intro");
 }
 
-function restoreDraft() {
-  const saved = loadDraft();
+function handleSecondary() {
+  updateStateFromForm();
 
-  if (!saved) {
-    fillForm(getDefaultState());
-    resetResult();
-    showStep(0);
+  if (state.screen === "upload") goTo("intro");
+  else if (state.screen === "style") goTo("processing");
+  else if (state.screen === "sample") goTo("style");
+  else if (state.screen === "revision") goTo(state.revisionMode === "final" ? "final" : "sample");
+  else if (state.screen === "final") {
+    state.revisionMode = "final";
+    goTo("revision");
+  } else if (state.screen === "export") goTo("final");
+}
+
+screenArea.addEventListener("input", updateStateFromForm);
+screenArea.addEventListener("change", (event) => {
+  updateStateFromForm();
+  const styleButton = event.target.closest?.("[data-style]");
+  if (styleButton) state.selectedStyle = styleButton.dataset.style;
+});
+
+screenArea.addEventListener("click", (event) => {
+  const exportButton = event.target.closest("[data-export]");
+  if (exportButton) {
+    downloadExport(exportButton.dataset.export);
     return;
   }
 
-  fillForm(saved.data || getDefaultState());
-  latestResult = saved.result || null;
-  renderResult(latestResult);
-  currentStep = saved.currentStep ?? 0;
-  showStep(currentStep);
-}
+  const styleButton = event.target.closest("[data-style]");
+  if (!styleButton) return;
+  state.selectedStyle = styleButton.dataset.style;
+  render();
+});
 
-function resetFileInputs() {
-  imageFilesInput.value = "";
-  videoFilesInput.value = "";
-  docFilesInput.value = "";
-}
+primaryAction.addEventListener("click", handlePrimary);
+secondaryAction.addEventListener("click", handleSecondary);
+tertiaryAction.addEventListener("click", () => {
+  state.revisionMode = "sample";
+  goTo("revision");
+});
 
-function initializeEvents() {
-  prevStepButton.addEventListener("click", () => {
-    showStep(Math.max(0, currentStep - 1));
-  });
-
-  nextStepButton.addEventListener("click", () => {
-    if (!validateStep(currentStep)) {
-      return;
-    }
-
-    showStep(Math.min(STEP_CONFIG.length - 1, currentStep + 1));
-  });
-
-  form.addEventListener("submit", (event) => {
-    event.preventDefault();
-
-    if (!validateStep(3)) {
-      return;
-    }
-
-    latestResult = buildResult();
-    renderResult(latestResult);
-    renderLivePreview();
-    saveDraft();
-    resultShell.scrollIntoView({ behavior: "smooth", block: "start" });
-    announce("输出内容已生成。");
-  });
-
-  form.addEventListener("change", (event) => {
-    const target = event.target;
-
-    if (target.name === "audienceOption") {
-      updateAudienceCustomVisibility();
-    }
-
-    resetResult();
-    renderAllDerivedViews();
-    saveDraft();
-  });
-
-  form.addEventListener("input", () => {
-    resetResult();
-    renderAllDerivedViews();
-    saveDraft();
-  });
-
-  toneOptionsContainer.addEventListener("click", (event) => {
-    const trigger = event.target.closest("[data-tone-option]");
-
-    if (!trigger) {
-      return;
-    }
-
-    selectedToneOption = trigger.dataset.toneOption;
-    resetResult();
-    renderAllDerivedViews();
-    saveDraft();
-  });
-
-  styleOptionsContainer.addEventListener("click", (event) => {
-    const trigger = event.target.closest("[data-style-option]");
-
-    if (!trigger) {
-      return;
-    }
-
-    selectedStyleOption = trigger.dataset.styleOption;
-    resetResult();
-    renderAllDerivedViews();
-    saveDraft();
-  });
-
-  toneCustomInput.addEventListener("focus", () => {
-    selectedToneOption = "custom";
-    renderAllDerivedViews();
-    saveDraft();
-  });
-
-  toneCustomInput.addEventListener("input", () => {
-    selectedToneOption = "custom";
-    renderAllDerivedViews();
-    saveDraft();
-  });
-
-  styleCustomInput.addEventListener("focus", () => {
-    selectedStyleOption = "custom";
-    renderAllDerivedViews();
-    saveDraft();
-  });
-
-  styleCustomInput.addEventListener("input", () => {
-    selectedStyleOption = "custom";
-    renderAllDerivedViews();
-    saveDraft();
-  });
-
-  imageFilesInput.addEventListener("change", () => {
-    setFileSnapshot("imageFiles", imageFilesInput.files || []);
-    resetResult();
-    renderAllDerivedViews();
-    saveDraft();
-  });
-
-  videoFilesInput.addEventListener("change", () => {
-    setFileSnapshot("videoFiles", videoFilesInput.files || []);
-    resetResult();
-    renderAllDerivedViews();
-    saveDraft();
-  });
-
-  docFilesInput.addEventListener("change", () => {
-    setFileSnapshot("docFiles", docFilesInput.files || []);
-    resetResult();
-    renderAllDerivedViews();
-    saveDraft();
-  });
-
-  fillExampleButton.addEventListener("click", () => {
-    fillForm(EXAMPLE_DATA);
-    resetFileInputs();
-    latestResult = null;
-    renderResult(null);
-    showStep(0);
-    announce("已填入示例内容。");
-  });
-
-  resetFormButton.addEventListener("click", () => {
-    form.reset();
-    resetFileInputs();
-    fileSnapshots = {
-      imageFiles: [],
-      videoFiles: [],
-      docFiles: [],
-    };
-    selectedToneOption = null;
-    selectedStyleOption = null;
-    toneCustomInput.value = "";
-    styleCustomInput.value = "";
-    fillForm(getDefaultState());
-    clearDraft();
-    latestResult = null;
-    renderResult(null);
-    showStep(0);
-    announce("已清空。");
-  });
-
-  copyOutputButton.addEventListener("click", async () => {
-    if (!latestResult) {
-      return;
-    }
-
-    const copied = await copyText(latestResult.text);
-
-    if (copied) {
-      announce("输出内容已复制。");
-      return;
-    }
-
-    announce("复制失败，请手动复制。");
-  });
-
-  editOutputButton.addEventListener("click", () => {
-    showStep(0);
-    document.querySelector(".wizard-shell")?.scrollIntoView({
-      behavior: "smooth",
-      block: "start",
-    });
-  });
-}
-
-initializeEvents();
-restoreDraft();
+render();

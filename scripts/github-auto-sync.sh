@@ -5,10 +5,14 @@ export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 export GIT_TERMINAL_PROMPT=0
 
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd -P)"
+STATE_DIR="$HOME/Library/Application Support/gzl-github-sync"
+PENDING_FILE="$STATE_DIR/pending-upload.txt"
 LOCK_DIR="${TMPDIR:-/tmp}/gzl-github-auto-sync.lock"
 LOCK_PID_FILE="$LOCK_DIR/pid"
+TEMP_FILE=""
 
 cleanup() {
+  rm -f "$TEMP_FILE" >/dev/null 2>&1 || true
   rm -f "$LOCK_PID_FILE" >/dev/null 2>&1 || true
   rmdir "$LOCK_DIR" >/dev/null 2>&1 || true
 }
@@ -34,6 +38,7 @@ echo "$$" > "$LOCK_PID_FILE"
 trap cleanup EXIT
 
 cd "$ROOT_DIR"
+mkdir -p "$STATE_DIR"
 
 if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
   echo "[$(date '+%Y-%m-%d %H:%M:%S')] Not a git repository: $ROOT_DIR"
@@ -51,29 +56,37 @@ if ! git config user.name >/dev/null 2>&1 || ! git config user.email >/dev/null 
   exit 1
 fi
 
-if [ -z "$(git status --porcelain --untracked-files=all)" ]; then
-  exit 0
-fi
+STATUS_OUTPUT="$(git status --short --untracked-files=all)"
 
-git add -A
-
-if git diff --cached --quiet; then
-  exit 0
-fi
-
-COMMIT_MESSAGE="chore: auto sync $(date '+%Y-%m-%d %H:%M:%S')"
-git commit -m "$COMMIT_MESSAGE"
-
-if git ls-remote --exit-code --heads origin "$BRANCH_NAME" >/dev/null 2>&1; then
-  if ! git pull --rebase origin "$BRANCH_NAME"; then
-    git rebase --abort >/dev/null 2>&1 || true
-    echo "[$(date '+%Y-%m-%d %H:%M:%S')] Rebase failed. Resolve conflicts manually."
-    exit 1
+if [ -z "$STATUS_OUTPUT" ]; then
+  if [ -f "$PENDING_FILE" ]; then
+    rm -f "$PENDING_FILE"
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] Working tree is clean."
   fi
 
-  git push origin "$BRANCH_NAME"
-else
-  git push -u origin "$BRANCH_NAME"
+  exit 0
 fi
 
-echo "[$(date '+%Y-%m-%d %H:%M:%S')] Synced branch $BRANCH_NAME to GitHub."
+TEMP_FILE="$(mktemp "${TMPDIR:-/tmp}/gzl-pending-upload.XXXXXX")"
+
+{
+  echo "Pending GitHub upload confirmation"
+  echo "Updated: $(date '+%Y-%m-%d %H:%M:%S')"
+  echo "Repository: $ROOT_DIR"
+  echo "Branch: $BRANCH_NAME"
+  echo
+  echo "Changed files:"
+  printf '%s\n' "$STATUS_OUTPUT"
+  echo
+  echo "To review pending changes:"
+  echo "  ./scripts/show-github-upload-status.sh"
+  echo
+  echo "To upload after your confirmation:"
+  echo "  ./scripts/confirm-github-upload.sh"
+} > "$TEMP_FILE"
+
+if ! cmp -s "$TEMP_FILE" "$PENDING_FILE" 2>/dev/null; then
+  mv "$TEMP_FILE" "$PENDING_FILE"
+  TEMP_FILE=""
+  echo "[$(date '+%Y-%m-%d %H:%M:%S')] Pending changes detected. Waiting for manual confirmation."
+fi

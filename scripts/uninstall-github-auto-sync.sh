@@ -2,6 +2,7 @@
 set -euo pipefail
 
 PID_FILE="$HOME/Library/Application Support/gzl-github-sync/auto-sync.pid"
+PENDING_FILE="$HOME/Library/Application Support/gzl-github-sync/pending-upload.txt"
 PLIST_PATH="$HOME/Library/LaunchAgents/com.luqiling.gzl.github-auto-sync.plist"
 LOCK_DIR="${TMPDIR:-/tmp}/gzl-github-auto-sync.lock"
 
@@ -21,5 +22,6 @@ fi
 
 rm -f "$LOCK_DIR/pid" >/dev/null 2>&1 || true
 rmdir "$LOCK_DIR" >/dev/null 2>&1 || true
+rm -f "$PENDING_FILE" >/dev/null 2>&1 || true
 
 echo "Stopped GitHub auto sync."
