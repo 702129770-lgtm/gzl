@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="按步骤填写信息、选择风格选项，并生成 PPT 执行输出内容。"
+      content="把 PPT 制作需求收口成一份完整 brief，确认素材边界、风格方向和交付方式。"
     />
-    <title>PPT Brief Builder</title>
+    <title>PPT Brief Builder Preview</title>
     <link
       rel="icon"
       href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%2318312c'/%3E%3Cpath d='M18 22h28v6H18zm0 14h18v6H18z' fill='%23f8efe3'/%3E%3C/svg%3E"
@@ -15,7 +15,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@500;600;700;800&display=swap"
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=Manrope:wght@400;500;600;700;800&family=Sora:wght@500;600;700;800&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="css/style.css" />
@@ -26,12 +26,20 @@
         <div class="container header-row">
           <a class="brand" href="#top">
             <span class="brand-mark">CB</span>
-            <span class="brand-text">PPT Brief Builder</span>
+            <span class="brand-copy">
+              <strong class="brand-text">PPT Brief Builder</strong>
+              <small>Preview Build</small>
+            </span>
           </a>
+
+          <div class="header-meta">
+            <span class="status-pill">Brief - Sample - Deliver</span>
+            <p>先对齐输入，再进入样稿。</p>
+          </div>
 
           <div class="header-actions">
             <button class="button button-secondary button-compact" type="button" id="fill-example">
-              示例
+              填入示例
             </button>
             <button class="button button-ghost button-compact" type="button" id="reset-form">
               清空
@@ -42,224 +50,378 @@
 
       <main class="wizard-main" id="top">
         <section class="wizard-shell container">
-          <div class="wizard-intro">
-            <p class="eyebrow">PPT Brief Builder</p>
-            <h1>按步骤填写信息</h1>
+          <div class="brief-hero">
+            <div class="hero-copy">
+              <p class="eyebrow">Brief Builder</p>
+              <h1>把资料输入收口成一份可执行的 PPT 制作 brief。</h1>
+              <p class="hero-text">
+                从用途、素材、风格到输出方式，先一次确认清楚，再进入 1 页样稿和最终交付。这个版本已经按实际工作流做成可预览原型。
+              </p>
+
+              <div class="hero-stats">
+                <article class="stat-card">
+                  <strong>4 步向导</strong>
+                  <p>场景、素材、风格、交付逐步锁定。</p>
+                </article>
+                <article class="stat-card">
+                  <strong>实时侧边预览</strong>
+                  <p>边填边看到样稿语气和页面大纲。</p>
+                </article>
+                <article class="stat-card">
+                  <strong>结果可复制</strong>
+                  <p>直接交给执行者或后续自动化流程。</p>
+                </article>
+              </div>
+            </div>
+
+            <div class="workflow-map">
+              <div class="card-head">
+                <h2>完整制作流</h2>
+                <span class="mini-status">Canva 优先</span>
+              </div>
+
+              <div class="workflow-list">
+                <article class="workflow-card">
+                  <span>01</span>
+                  <h3>资料读取</h3>
+                  <p>统一收集文字、链接、截图、文档，明确哪些是内容来源。</p>
+                </article>
+                <article class="workflow-card">
+                  <span>02</span>
+                  <h3>确认边界</h3>
+                  <p>先讲清楚哪些能参考，哪些只能读取内容不能复用设计。</p>
+                </article>
+                <article class="workflow-card">
+                  <span>03</span>
+                  <h3>对齐风格</h3>
+                  <p>给出调性与版式方向，再决定 1 页代表性样稿怎么做。</p>
+                </article>
+                <article class="workflow-card">
+                  <span>04</span>
+                  <h3>交付输出</h3>
+                  <p>样稿通过后扩展全稿，再导出 PPTX、PDF 和讲稿。</p>
+                </article>
+              </div>
+            </div>
           </div>
 
-          <div class="progress-row" id="progress-row" aria-label="步骤进度"></div>
-
-          <form class="wizard-form" id="brief-form" novalidate>
-            <section class="wizard-step" data-step="0">
-              <div class="step-head">
-                <span class="step-kicker">步骤 1</span>
-                <h2>基础信息</h2>
+          <div class="builder-layout">
+            <section class="editor-panel">
+              <div class="wizard-intro">
+                <p class="eyebrow">Editor</p>
+                <h2>填写制作条件</h2>
+                <p class="section-copy">
+                  这里的输入会直接影响调性推荐、风格推荐、样稿预览和最终输出 brief。
+                </p>
               </div>
 
-              <div class="field-grid">
-                <label class="field">
-                  <span>项目名称</span>
-                  <input
-                    type="text"
-                    name="projectName"
-                    placeholder="例如：某公司 CEO 单页介绍"
-                  />
-                </label>
+              <div class="progress-row" id="progress-row" aria-label="步骤进度"></div>
 
-                <label class="field">
-                  <span>使用场景</span>
-                  <select name="useCase" required>
-                    <option value="">请选择</option>
-                    <option value="CEO介绍">CEO 介绍</option>
-                    <option value="品牌客户提案">品牌客户提案</option>
-                    <option value="产品介绍">产品介绍</option>
-                    <option value="融资路演">融资路演</option>
-                    <option value="项目汇报">项目汇报</option>
-                    <option value="培训课件">培训课件</option>
-                  </select>
-                </label>
-
-                <fieldset class="field fieldset field-span-2">
-                  <legend>目标观众</legend>
-                  <div class="radio-group" id="audience-options">
-                    <label><input type="radio" name="audienceOption" value="品牌客户" checked />品牌客户</label>
-                    <label><input type="radio" name="audienceOption" value="投资人" />投资人</label>
-                    <label><input type="radio" name="audienceOption" value="内部管理层" />内部管理层</label>
-                    <label><input type="radio" name="audienceOption" value="合作伙伴" />合作伙伴</label>
-                    <label><input type="radio" name="audienceOption" value="培训学员" />培训学员</label>
-                    <label><input type="radio" name="audienceOption" value="其他" />其他</label>
+              <form class="wizard-form" id="brief-form" novalidate>
+                <section class="wizard-step" data-step="0">
+                  <div class="step-head">
+                    <span class="step-kicker">步骤 1</span>
+                    <h3>基础信息</h3>
+                    <p>先把场景、受众和页数范围讲清楚，后面的推荐才会更准。</p>
                   </div>
-                  <input
-                    type="text"
-                    name="audienceCustom"
-                    id="audience-custom"
-                    placeholder="输入其他目标观众"
-                    hidden
-                  />
-                </fieldset>
 
-                <label class="field">
-                  <span>页数预期</span>
-                  <select name="pageCount" required>
-                    <option value="1页">1 页单页</option>
-                    <option value="5页">5 页以内</option>
-                    <option value="10页">10 页左右</option>
-                    <option value="自动判断">自动判断</option>
-                  </select>
-                </label>
+                  <div class="field-grid">
+                    <label class="field">
+                      <span>项目名称</span>
+                      <input
+                        type="text"
+                        name="projectName"
+                        placeholder="例如：某公司 CEO 单页介绍"
+                      />
+                    </label>
 
-                <label class="field">
-                  <span>语言</span>
-                  <select name="language" required>
-                    <option value="中文">中文</option>
-                    <option value="英文">英文</option>
-                    <option value="中英双语">中英双语</option>
-                  </select>
-                </label>
-              </div>
-            </section>
+                    <label class="field">
+                      <span>使用场景</span>
+                      <select name="useCase" required>
+                        <option value="">请选择</option>
+                        <option value="CEO介绍">CEO 介绍</option>
+                        <option value="品牌客户提案">品牌客户提案</option>
+                        <option value="产品介绍">产品介绍</option>
+                        <option value="融资路演">融资路演</option>
+                        <option value="项目汇报">项目汇报</option>
+                        <option value="培训课件">培训课件</option>
+                      </select>
+                    </label>
 
-            <section class="wizard-step" data-step="1" hidden>
-              <div class="step-head">
-                <span class="step-kicker">步骤 2</span>
-                <h2>素材与限制</h2>
-              </div>
+                    <fieldset class="field fieldset field-span-2">
+                      <legend>目标观众</legend>
+                      <div class="radio-group" id="audience-options">
+                        <label><input type="radio" name="audienceOption" value="品牌客户" checked />品牌客户</label>
+                        <label><input type="radio" name="audienceOption" value="投资人" />投资人</label>
+                        <label><input type="radio" name="audienceOption" value="内部管理层" />内部管理层</label>
+                        <label><input type="radio" name="audienceOption" value="合作伙伴" />合作伙伴</label>
+                        <label><input type="radio" name="audienceOption" value="培训学员" />培训学员</label>
+                        <label><input type="radio" name="audienceOption" value="其他" />其他</label>
+                      </div>
+                      <input
+                        type="text"
+                        name="audienceCustom"
+                        id="audience-custom"
+                        placeholder="输入其他目标观众"
+                        hidden
+                      />
+                    </fieldset>
 
-              <label class="field">
-                <span>文字素材</span>
-                <textarea
-                  name="materialsText"
-                  rows="7"
-                  placeholder="例如：人物截图、公司简介、3 条代表成绩、产品图、季度数据"
-                ></textarea>
-              </label>
+                    <label class="field">
+                      <span>页数预期</span>
+                      <select name="pageCount" required>
+                        <option value="1页">1 页单页</option>
+                        <option value="5页">5 页以内</option>
+                        <option value="10页">10 页左右</option>
+                        <option value="自动判断">自动判断</option>
+                      </select>
+                    </label>
 
-              <div class="field-grid">
-                <label class="field">
-                  <span>链接</span>
-                  <textarea
-                    name="referenceLinks"
-                    rows="5"
-                    placeholder="每行一个链接，例如官网、文档、网盘、视频地址"
-                  ></textarea>
-                </label>
+                    <label class="field">
+                      <span>语言</span>
+                      <select name="language" required>
+                        <option value="中文">中文</option>
+                        <option value="英文">英文</option>
+                        <option value="中英双语">中英双语</option>
+                      </select>
+                    </label>
+                  </div>
+                </section>
 
-                <div class="upload-stack">
-                  <label class="field upload-field">
-                    <span>图片 / 截图</span>
-                    <input type="file" name="imageFiles" id="image-files" accept="image/*" multiple />
-                    <small class="file-summary" id="image-files-summary">未选择文件</small>
+                <section class="wizard-step" data-step="1" hidden>
+                  <div class="step-head">
+                    <span class="step-kicker">步骤 2</span>
+                    <h3>素材与限制</h3>
+                    <p>把“能用什么”和“不能参考什么”说清楚，能明显减少返工。</p>
+                  </div>
+
+                  <label class="field">
+                    <span>文字素材</span>
+                    <textarea
+                      name="materialsText"
+                      rows="7"
+                      placeholder="例如：人物截图、公司简介、3 条代表成绩、产品图、季度数据"
+                    ></textarea>
+                    <small class="helper-text">可直接写要点，也可以写你希望提炼出的信息。</small>
                   </label>
 
-                  <label class="field upload-field">
-                    <span>视频 / 录屏</span>
-                    <input type="file" name="videoFiles" id="video-files" accept="video/*" multiple />
-                    <small class="file-summary" id="video-files-summary">未选择文件</small>
-                  </label>
+                  <div class="field-grid">
+                    <label class="field">
+                      <span>链接</span>
+                      <textarea
+                        name="referenceLinks"
+                        rows="5"
+                        placeholder="每行一个链接，例如官网、文档、网盘、视频地址"
+                      ></textarea>
+                    </label>
 
-                  <label class="field upload-field">
-                    <span>文档 / PPT</span>
+                    <div class="upload-stack">
+                      <label class="field upload-field">
+                        <span>图片 / 截图</span>
+                        <input type="file" name="imageFiles" id="image-files" accept="image/*" multiple />
+                        <small class="file-summary" id="image-files-summary">未选择文件</small>
+                      </label>
+
+                      <label class="field upload-field">
+                        <span>视频 / 录屏</span>
+                        <input type="file" name="videoFiles" id="video-files" accept="video/*" multiple />
+                        <small class="file-summary" id="video-files-summary">未选择文件</small>
+                      </label>
+
+                      <label class="field upload-field">
+                        <span>文档 / PPT</span>
+                        <input
+                          type="file"
+                          name="docFiles"
+                          id="doc-files"
+                          accept=".pdf,.ppt,.pptx,.doc,.docx,.xls,.xlsx,.txt,.md"
+                          multiple
+                        />
+                        <small class="file-summary" id="doc-files-summary">未选择文件</small>
+                      </label>
+                    </div>
+                  </div>
+
+                  <label class="field">
+                    <span>限制条件</span>
+                    <textarea
+                      name="restrictions"
+                      rows="5"
+                      placeholder="例如：只读取文字和图片，不参考原截图版式、Logo 和旧 PPT 设计"
+                    ></textarea>
+                  </label>
+                </section>
+
+                <section class="wizard-step" data-step="2" hidden>
+                  <div class="step-head">
+                    <span class="step-kicker">步骤 3</span>
+                    <h3>选择调性与风格</h3>
+                    <p>系统会先给推荐项，你也可以手动输入自己的表达方向。</p>
+                  </div>
+
+                  <fieldset class="field fieldset choice-fieldset">
+                    <legend>表达调性</legend>
+                    <div class="choice-grid" id="tone-options"></div>
+                    <div class="custom-entry" id="tone-custom-wrap" hidden>
+                      <input
+                        type="text"
+                        name="toneCustom"
+                        id="tone-custom"
+                        placeholder="输入自定义调性"
+                      />
+                    </div>
+                  </fieldset>
+
+                  <div class="picker-head">
+                    <h3>可选风格</h3>
+                    <p>推荐结果会结合使用场景、素材类型和调性共同判断。</p>
+                  </div>
+
+                  <div class="choice-grid style-grid" id="style-options"></div>
+                  <div class="custom-entry" id="style-custom-wrap" hidden>
                     <input
-                      type="file"
-                      name="docFiles"
-                      id="doc-files"
-                      accept=".pdf,.ppt,.pptx,.doc,.docx,.xls,.xlsx,.txt,.md"
-                      multiple
+                      type="text"
+                      name="styleCustom"
+                      id="style-custom"
+                      placeholder="输入自定义风格"
                     />
-                    <small class="file-summary" id="doc-files-summary">未选择文件</small>
-                  </label>
-                </div>
-              </div>
+                  </div>
+                </section>
 
-              <label class="field">
-                <span>限制条件</span>
-                <textarea
-                  name="restrictions"
-                  rows="5"
-                  placeholder="例如：只读取文字和图片，不参考原截图版式、Logo 和旧 PPT 设计"
-                ></textarea>
-              </label>
+                <section class="wizard-step" data-step="3" hidden>
+                  <div class="step-head">
+                    <span class="step-kicker">步骤 4</span>
+                    <h3>输出设置</h3>
+                    <p>最后确认交付形式，生成一份可以直接继续制作的 brief。</p>
+                  </div>
+
+                  <fieldset class="field fieldset">
+                    <legend>输出格式</legend>
+                    <div class="checkbox-group">
+                      <label><input type="checkbox" name="output" value="PPTX" checked />PPTX</label>
+                      <label><input type="checkbox" name="output" value="PDF" />PDF</label>
+                      <label><input type="checkbox" name="output" value="讲稿" />讲稿</label>
+                    </div>
+                  </fieldset>
+
+                  <div class="confirm-card">
+                    <div class="card-head">
+                      <h3>确认信息</h3>
+                      <span class="mini-status">最终检查</span>
+                    </div>
+                    <dl class="confirm-list" id="confirm-list"></dl>
+                  </div>
+                </section>
+
+                <div class="wizard-actions">
+                  <button class="button button-secondary" type="button" id="prev-step">
+                    上一步
+                  </button>
+                  <button class="button button-primary" type="button" id="next-step">
+                    下一步
+                  </button>
+                  <button
+                    class="button button-primary"
+                    type="submit"
+                    id="generate-result"
+                    hidden
+                  >
+                    生成输出
+                  </button>
+                </div>
+              </form>
             </section>
 
-            <section class="wizard-step" data-step="2" hidden>
-              <div class="step-head">
-                <span class="step-kicker">步骤 3</span>
-                <h2>选择调性与风格</h2>
+            <aside class="preview-panel" aria-label="实时预览">
+              <div class="preview-head">
+                <p class="eyebrow">Live Preview</p>
+                <h2 id="preview-stage">定义项目</h2>
+                <p id="preview-stage-text">先确定这套 PPT 的用途、对象和页数边界。</p>
               </div>
 
-              <fieldset class="field fieldset choice-fieldset">
-                <legend>表达调性</legend>
-                <div class="choice-grid" id="tone-options"></div>
-                <div class="custom-entry" id="tone-custom-wrap" hidden>
-                  <input
-                    type="text"
-                    name="toneCustom"
-                    id="tone-custom"
-                    placeholder="输入自定义调性"
-                  />
+              <article class="preview-card preview-brief-card">
+                <div class="preview-label-row">
+                  <span class="preview-mono" id="preview-usecase">待选场景</span>
+                  <span class="preview-mono" id="preview-outputs">输出待定</span>
                 </div>
-              </fieldset>
-
-              <div class="picker-head">
-                <h3>可选风格</h3>
-              </div>
-
-              <div class="choice-grid style-grid" id="style-options"></div>
-              <div class="custom-entry" id="style-custom-wrap" hidden>
-                <input
-                  type="text"
-                  name="styleCustom"
-                  id="style-custom"
-                  placeholder="输入自定义风格"
-                />
-              </div>
-            </section>
-
-            <section class="wizard-step" data-step="3" hidden>
-              <div class="step-head">
-                <span class="step-kicker">步骤 4</span>
-                <h2>输出设置</h2>
-              </div>
-
-              <fieldset class="field fieldset">
-                <legend>输出格式</legend>
-                <div class="checkbox-group">
-                  <label><input type="checkbox" name="output" value="PPTX" checked />PPTX</label>
-                  <label><input type="checkbox" name="output" value="PDF" />PDF</label>
-                  <label><input type="checkbox" name="output" value="讲稿" />讲稿</label>
+                <h3 id="preview-project">未命名项目</h3>
+                <p id="preview-audience">目标观众待确认</p>
+                <div class="preview-chip-row">
+                  <span class="preview-chip" id="preview-tone-chip">调性待推荐</span>
+                  <span class="preview-chip" id="preview-style-chip">风格待推荐</span>
                 </div>
-              </fieldset>
+                <p class="preview-copy" id="preview-style-meta">
+                  选择风格后，这里会显示色彩、版式和适配理由。
+                </p>
+              </article>
 
-              <div class="confirm-card">
-                <h3>确认信息</h3>
-                <dl class="confirm-list" id="confirm-list"></dl>
-              </div>
-            </section>
+              <article class="preview-card preview-stage-card" id="preview-cover">
+                <div class="mock-slide-top">
+                  <span class="mock-slide-tag" id="preview-slide-tag">样稿预览</span>
+                  <span class="mock-slide-page" id="preview-page-count">1 页样稿</span>
+                </div>
 
-            <div class="wizard-actions">
-              <button class="button button-secondary" type="button" id="prev-step">
-                上一步
-              </button>
-              <button class="button button-primary" type="button" id="next-step">
-                下一步
-              </button>
-              <button
-                class="button button-primary"
-                type="submit"
-                id="generate-result"
-                hidden
-              >
-                生成输出
-              </button>
-            </div>
-          </form>
+                <div class="mock-slide-body">
+                  <div class="mock-slide-copy">
+                    <p class="mock-slide-kicker">Sample Slide</p>
+                    <h3 id="preview-slide-title">项目标题将在这里显示</h3>
+                    <p id="preview-slide-subtitle">
+                      当你选择场景与风格后，这里会展示一页代表性样稿的语气。
+                    </p>
+                  </div>
+
+                  <div class="mock-slide-grid">
+                    <div class="mock-slide-points" id="preview-slide-points"></div>
+                    <div class="mock-slide-stats" id="preview-slide-stats"></div>
+                  </div>
+                </div>
+              </article>
+
+              <article class="preview-card">
+                <div class="card-head">
+                  <h3>推荐制作判断</h3>
+                  <span class="mini-status">实时更新</span>
+                </div>
+
+                <div class="decision-grid">
+                  <div>
+                    <span>表达调性</span>
+                    <strong id="preview-tone-strong">未选择</strong>
+                    <p id="preview-tone-desc">系统会根据场景和素材给出推荐。</p>
+                  </div>
+
+                  <div>
+                    <span>素材概况</span>
+                    <strong id="preview-material-count">未填写</strong>
+                    <p id="preview-restrictions">暂无限制条件。</p>
+                  </div>
+                </div>
+              </article>
+
+              <article class="preview-card">
+                <div class="card-head">
+                  <h3>建议大纲</h3>
+                  <span class="mini-status">自动生成</span>
+                </div>
+                <div class="outline-list" id="preview-outline"></div>
+              </article>
+
+              <article class="preview-card">
+                <div class="card-head">
+                  <h3>交付阶段</h3>
+                  <span class="mini-status">从 brief 到交付</span>
+                </div>
+                <div class="stage-strip" id="preview-stage-strip"></div>
+              </article>
+            </aside>
+          </div>
         </section>
 
         <section class="result-shell container" id="result-shell" hidden>
           <div class="result-head">
             <div>
               <p class="eyebrow">Output</p>
-              <h2>输出内容</h2>
+              <h2>执行 brief 已生成</h2>
             </div>
 
             <div class="result-actions">
@@ -274,7 +436,38 @@
 
           <div class="result-summary" id="result-summary"></div>
 
+          <div class="result-grid">
+            <article class="result-panel">
+              <div class="result-panel-head">
+                <h3>项目摘要</h3>
+              </div>
+              <p class="panel-copy" id="result-overview"></p>
+              <ul class="result-checklist" id="result-checklist"></ul>
+            </article>
+
+            <article class="result-panel">
+              <div class="result-panel-head">
+                <h3>下一步执行路径</h3>
+              </div>
+              <ol class="result-flow" id="result-workflow"></ol>
+            </article>
+          </div>
+
+          <article class="result-panel">
+            <div class="result-panel-head">
+              <h3>页面大纲建议</h3>
+              <span class="mini-status">可作为样稿分镜</span>
+            </div>
+            <div class="result-outline-grid" id="result-outline"></div>
+          </article>
+
           <article class="result-card">
+            <div class="result-panel-head">
+              <div>
+                <h3>交付 brief 文本</h3>
+                <p class="panel-copy">可直接复制给执行者或下一步自动化流程。</p>
+              </div>
+            </div>
             <pre id="result-text"></pre>
           </article>
         </section>
