@@ -24,15 +24,15 @@ const screens = [
     id: "style",
     header: "选择风格",
     eyebrow: "Style options",
-    title: "选择一个你希望样稿靠近的视觉方向。",
-    copy: "风格会影响网页预览和导出的 PPTX / PDF 版式。",
+    title: "选择一个样稿方向。",
+    copy: "前三个推荐项为预设设计方向；如果都不合适，第四个可以自定义。",
   },
   {
     id: "sample",
     header: "确认样稿",
     eyebrow: "Sample review",
-    title: "这是根据当前资料生成的样稿方向。",
-    copy: "你可以查看样稿、返回重选风格，或进入修改反馈。",
+    title: "这是按已选模板方向生成的完整样稿。",
+    copy: "左侧已把你的文字置入所选风格，形成完整页数样稿；你可以返回重选风格或进入修改反馈。",
   },
   {
     id: "revision",
@@ -67,27 +67,48 @@ const screens = [
 const styles = [
   {
     id: "profile",
-    label: "推荐 01",
-    title: "高可信人物风",
-    copy: "适合 CEO 介绍、个人品牌、公司简介。深色标题、清晰履历卡片、稳重可信。",
-    tag: "Profile deck",
-    colors: { bg: "F7F9FD", title: "061B31", accent: "533AFD", soft: "E9E7FF", text: "334155" },
+    label: "方案 01",
+    title: "企业介绍模板",
+    copy: "蓝色建筑底图、双语标题和大面积留白，适合公司介绍与可信背书。",
+    tag: "Enterprise intro",
+    source: "企业介绍设计参考",
+    example: {
+      brand: "BRAND",
+      title: "企业介绍模板",
+      subtitle: "ENTERPRISE INTRODUCTION TEMPLATE",
+      footer: "品牌展示 · 企业介绍",
+    },
+    colors: { bg: "EAF5FF", title: "064B78", accent: "0B7FC3", soft: "CFEAFF", text: "24485C" },
   },
   {
     id: "product",
-    label: "推荐 02",
-    title: "科技产品风",
-    copy: "适合产品介绍、项目汇报、客户提案。信息卡片、模块化结构、数据表达清晰。",
-    tag: "Product deck",
-    colors: { bg: "F3FBFA", title: "062C30", accent: "0E8F85", soft: "DFF4F0", text: "36545A" },
+    label: "方案 02",
+    title: "产品推广方案",
+    copy: "白底、蓝色侧栏和产品图占位，适合产品介绍、发布会与客户提案。",
+    tag: "Product launch",
+    source: "产品推广设计参考",
+    example: {
+      brand: "YOUR LOGO",
+      title: "产品推广方案",
+      subtitle: "Product Launch",
+      footer: "Product Launch · Electronics",
+    },
+    colors: { bg: "F7FAFF", title: "1A2440", accent: "2563EB", soft: "DCEBFF", text: "41516F" },
   },
   {
     id: "pitch",
-    label: "推荐 03",
-    title: "高冲击路演风",
-    copy: "适合融资路演、增长汇报、商业计划。关键数字突出、页面节奏更强。",
-    tag: "Pitch deck",
-    colors: { bg: "101322", title: "FFFFFF", accent: "EA2261", soft: "302039", text: "DDE3EE" },
+    label: "方案 03",
+    title: "商业计划书通用模板",
+    copy: "建筑实景、青蓝标题和商务目录结构，适合商业计划、融资路演和方案汇报。",
+    tag: "Business plan",
+    source: "商业计划设计参考",
+    example: {
+      brand: "Business",
+      title: "商业计划书",
+      subtitle: "商务风商业计划书通用模板",
+      footer: "汇报人：张小可",
+    },
+    colors: { bg: "EFF8FF", title: "14385C", accent: "0EA5E9", soft: "CDEEFF", text: "31506D" },
   },
   {
     id: "custom",
@@ -99,7 +120,7 @@ const styles = [
   },
 ];
 
-const storageKey = "gzl-ppt-assistant-state-v2";
+const storageKey = "gzl-ppt-assistant-state-v3";
 const defaultOutputs = ["pptx", "pdf", "notes"];
 
 const state = {
@@ -354,9 +375,10 @@ function renderStyle() {
           (style) => `
             <button class="style-card ${state.selectedStyle === style.id ? "is-selected" : ""}" type="button" data-style="${style.id}">
               <span>${style.label}</span>
+              ${renderStyleExample(style)}
               <strong>${style.title}</strong>
               <p>${style.copy}</p>
-              <div class="style-preview style-${style.id}" aria-hidden="true"><i></i><i></i><i></i></div>
+              <small class="style-source">${escapeHtml(style.source || "第四项：不使用固定模板，由你描述视觉方向。")}</small>
             </button>
           `,
         )
@@ -376,6 +398,25 @@ function renderStyle() {
   `;
 }
 
+function renderStyleExample(style) {
+  const example = style.example || {
+    brand: "Custom",
+    title: "自定义风格",
+    subtitle: "Describe your own direction",
+    footer: "按你的描述生成样稿",
+  };
+
+  return `
+    <div class="template-example template-example-${style.id}" aria-hidden="true">
+      <span>${escapeHtml(example.brand)}</span>
+      <b>${escapeHtml(example.title)}</b>
+      <small>${escapeHtml(example.subtitle)}</small>
+      <i></i>
+      <em>${escapeHtml(example.footer)}</em>
+    </div>
+  `;
+}
+
 function renderSample() {
   ensureDeckPages();
   const style = getStyle();
@@ -383,17 +424,52 @@ function renderSample() {
     style.id === "custom" && state.customStyleDescription
       ? `自定义风格：${state.customStyleDescription}`
       : style.title;
-  const sample = state.deckPages[0];
 
   return `
     <div class="sample-layout">
-      ${renderSlidePreview(sample, "sample-card")}
+      ${renderSampleDeckPreview()}
       <div class="sample-list">
         <div><strong>样稿风格</strong><p>${escapeHtml(styleTitle)}</p></div>
+        <div><strong>设计参考</strong><p>${renderStyleSource(style)}</p></div>
         <div><strong>页面结构</strong><p>${state.deckPages.map((page) => escapeHtml(page.title)).join("、")}</p></div>
+        <div><strong>样稿范围</strong><p>已生成 ${state.deckPages.length} 页完整样稿，左侧预览按所选风格直接置入文字。</p></div>
         <div><strong>内容来源</strong><p>${getSourceSummary()}</p></div>
       </div>
     </div>
+  `;
+}
+
+function renderStyleSource(style) {
+  const source = escapeHtml(style.source || "自定义风格描述");
+  return source;
+}
+
+function renderSampleDeckPreview() {
+  const pages = state.deckPages;
+  const cover = pages[0];
+  const remainingPages = pages.slice(1);
+
+  return `
+    <section class="sample-deck-preview" aria-label="完整样稿预览">
+      ${renderSlidePreview(cover, "sample-card sample-page-main", { pageNumber: "01", pointsLimit: 4 })}
+      ${
+        remainingPages.length
+          ? `
+            <div class="sample-thumb-grid">
+              ${remainingPages
+                .map((page, index) =>
+                  renderSlidePreview(page, "sample-thumb", {
+                    pageNumber: String(index + 2).padStart(2, "0"),
+                    pointsLimit: 3,
+                    compact: true,
+                  }),
+                )
+                .join("")}
+            </div>
+          `
+          : ""
+      }
+    </section>
   `;
 }
 
@@ -509,15 +585,22 @@ function renderScreenBody() {
   return "";
 }
 
-function renderSlidePreview(page, className = "slide-preview") {
+function renderSlidePreview(page, className = "slide-preview", options = {}) {
   const style = getStyle();
   const points = page?.points || [];
+  const pointsLimit = options.pointsLimit || 4;
+  const compactClass = options.compact ? " is-compact" : "";
+  const pageNumber = options.pageNumber
+    ? `<span class="slide-page-number">${escapeHtml(options.pageNumber)}</span>`
+    : "";
+
   return `
-    <article class="${className} slide-skin slide-skin-${style.id}">
+    <article class="${className} slide-skin slide-skin-${style.id}${compactClass}">
+      ${pageNumber}
       <p class="eyebrow">${escapeHtml(style.tag)}</p>
       <h3>${escapeHtml(page?.title || state.projectName || "项目样稿标题")}</h3>
       <p>${escapeHtml(page?.subtitle || `${state.useCase || "待选场景"} · ${state.audience || "目标观众待确认"}`)}</p>
-      <ul>${points.slice(0, 4).map((point) => `<li>${escapeHtml(point)}</li>`).join("")}</ul>
+      <ul>${points.slice(0, pointsLimit).map((point) => `<li>${escapeHtml(point)}</li>`).join("")}</ul>
     </article>
   `;
 }
@@ -731,6 +814,7 @@ function buildDeckPages() {
     subtitle: `${state.useCase || "项目汇报"} · 面向${state.audience || "目标观众"}`,
     points: [
       `风格方向：${style.id === "custom" && state.customStyleDescription ? state.customStyleDescription : style.title}`,
+      `设计参考：${style.source || "自定义风格"}`,
       `资料来源：${getSourceSummary()}`,
       "本文件由网页端根据用户资料自动生成，可继续编辑。",
     ],
@@ -780,7 +864,12 @@ function getPagePoints(title, index, lines) {
   const fallbackByTitle = {
     项目背景: [`${project}用于${useCase}，需要先建立清晰背景。`, `核心听众是${audience}，内容表达应围绕他们的关注点展开。`, "建议用简洁页面说明问题、机会和目标。"],
     核心信息: ["优先呈现最重要的结论，再补充关键依据。", "把分散资料归纳为 3 到 5 个可讲述的重点。", "每页只保留一个主观点，降低阅读负担。"],
-    方案亮点: [`当前风格方向为${style.id === "custom" && state.customStyleDescription ? state.customStyleDescription : style.title}。`, "页面结构保留标题、副标题、要点和讲稿提示。", "导出后文本仍可继续编辑。"],
+    方案亮点: [
+      `当前风格方向为${style.id === "custom" && state.customStyleDescription ? state.customStyleDescription : style.title}。`,
+      `设计参考为${style.source || "用户自定义风格"}。`,
+      "页面结构保留标题、副标题、要点和讲稿提示。",
+      "导出后文本仍可继续编辑。",
+    ],
     关键数据: ["如资料中含数据，建议用大数字、短标签和一句解释呈现。", "如果暂缺数据，可以先用结论占位，后续替换为真实指标。", "避免在同一页堆叠过多指标。"],
     执行计划: ["按时间、责任或优先级拆分下一步行动。", "每个行动点保持可落地、可追踪。", "结尾页可明确需要听众确认的事项。"],
     风险与建议: ["提前说明待补充资料、口径差异和外部依赖。", "把风险转化为具体建议，便于继续推进。", "必要时保留备选方案。"],
@@ -835,6 +924,7 @@ function buildNotesContent() {
     `目标观众：${state.audience || "未填写"}`,
     `页数预期：${state.pageCount}`,
     `风格方向：${styleText}`,
+    `设计参考：${style.source || "自定义风格"}`,
     `资料来源：${getSourceSummary()}`,
     "",
     "页面讲稿：",
