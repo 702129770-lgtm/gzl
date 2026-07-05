@@ -17,17 +17,27 @@ python3 -m http.server 4173
 ## 使用范围
 
 - 仅提供桌面网页版，建议使用 1280px 及以上宽度访问
-- 当前版本为公开流程预览，不会真实上传用户文件
-- 导出按钮会生成用于确认流程的文本预览文件
+- 当前版本为纯前端静态网页，不会真实上传用户文件
+- TXT、MD、CSV、JSON 文件会在浏览器本地读取并参与页面内容生成
+- 导出按钮会在浏览器本地生成 PPTX、PDF 和讲稿文件
+- PPTX、PDF 生成依赖已放入 `js/vendor/`，线上访问不依赖第三方 CDN
 
 ## 当前功能
 
 - 从首页介绍进入资料提交页
-- 填写项目名称、使用场景、目标观众、页数和资料链接
+- 填写项目名称、使用场景、目标观众、页数、资料链接和内容要点
+- 本地读取文本资料，并记录图片、PDF、PPT、Word 等附件信息
+- 根据资料生成样稿、完整页面结构和每页讲稿提示
 - 自动跳转到风格选择页
 - 支持 3 个推荐风格和 1 个自定义风格
 - 支持样稿确认、样稿修改、成稿预览和成稿修改
-- 导出页提供 PPTX、PDF 和讲稿入口，并生成预览下载文件
+- 导出页提供 PPTX、PDF 和讲稿入口，并生成真实下载文件
+
+## 最新设计备份
+
+网页设计原型、页面跳转逻辑、设计参考、对外界面和重复版本清理结论已统一整理到：
+
+- [LATEST_WEB_DESIGN_BACKUP.md](LATEST_WEB_DESIGN_BACKUP.md)
 
 ## GitHub 上传确认
 
@@ -70,3 +80,5 @@ python3 -m http.server 4173
 - [index.html](index.html)
 - [css/style.css](css/style.css)
 - [js/main.js](js/main.js)
+- [js/vendor](js/vendor)
+- [LATEST_WEB_DESIGN_BACKUP.md](LATEST_WEB_DESIGN_BACKUP.md)
